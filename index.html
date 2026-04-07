@@ -1,0 +1,105 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes">
+    <title>Lista de Presentes - Casamento Ana & Pedro</title>
+    <link rel="stylesheet" href="css/style.css">
+    <!-- Font Awesome para ícones -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+</head>
+<body>
+    <!-- Cabeçalho Principal -->
+    <header class="hero">
+        <div class="hero-content">
+            <h1>Ana <i class="fas fa-heart"></i> Pedro</h1>
+            <p class="date">15 de Junho, 2025</p>
+            <h2>Lista de Presentes</h2>
+            <p class="subtitle">Escolha um presente e nos ajude a realizar nossos sonhos</p>
+        </div>
+    </header>
+
+    <!-- Botão Admin (canto inferior direito) -->
+    <button id="adminToggleBtn" class="admin-toggle-btn" title="Modo Admin">
+        <i class="fas fa-cog"></i>
+    </button>
+
+    <!-- Modal Admin (inicialmente oculto) -->
+    <div id="adminModal" class="modal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h2><i class="fas fa-lock"></i> Área Administrativa</h2>
+                <span class="close-btn">&times;</span>
+            </div>
+            <div class="modal-body">
+                <div class="admin-tabs">
+                    <button class="tab-btn active" data-tab="login">Login</button>
+                    <button class="tab-btn" data-tab="manage">Gerenciar Presentes</button>
+                </div>
+                
+                <!-- Aba de Login -->
+                <div id="loginTab" class="tab-content active">
+                    <div class="form-group">
+                        <label for="adminPassword">Senha do Administrador:</label>
+                        <input type="password" id="adminPassword" placeholder="Digite a senha">
+                        <button id="loginBtn" class="btn-primary">Entrar</button>
+                        <p class="helper-text">Senha padrão: admin123</p>
+                    </div>
+                </div>
+
+                <!-- Aba de Gerenciamento -->
+                <div id="manageTab" class="tab-content">
+                    <h3>Adicionar Novo Presente</h3>
+                    <form id="addPresenteForm">
+                        <div class="form-group">
+                            <label for="produtoNome">Nome do Produto:</label>
+                            <input type="text" id="produtoNome" required>
+                        </div>
+                        <div class="form-group">
+                            <label for="produtoUrl">URL da Loja:</label>
+                            <input type="url" id="produtoUrl" placeholder="https://www.exemplo.com/produto" required>
+                        </div>
+                        <div class="form-group">
+                            <label for="produtoPreco">Preço (R$):</label>
+                            <input type="number" id="produtoPreco" step="0.01" required>
+                        </div>
+                        <div class="form-group">
+                            <label for="produtoImagem">URL da Imagem (opcional):</label>
+                            <input type="url" id="produtoImagem" placeholder="https://www.exemplo.com/imagem.jpg">
+                        </div>
+                        <button type="submit" class="btn-primary">Adicionar Presente</button>
+                    </form>
+
+                    <hr>
+
+                    <h3>Presentes Cadastrados</h3>
+                    <div id="adminPresentesList"></div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Lista de Presentes Principal -->
+    <main class="container">
+        <div class="filters">
+            <button class="filter-btn active" data-filter="all">Todos</button>
+            <button class="filter-btn" data-filter="available">Disponíveis</button>
+            <button class="filter-btn" data-filter="purchased">Comprados</button>
+        </div>
+        
+        <div id="presentesList" class="presentes-grid">
+            <!-- Os presentes serão carregados aqui via JavaScript -->
+            <div class="loading">Carregando presentes...</div>
+        </div>
+    </main>
+
+    <!-- Rodapé -->
+    <footer>
+        <p>© 2025 Ana & Pedro - Lista de Presentes de Casamento</p>
+        <p>Presentes adicionados via links das lojas oficiais</p>
+    </footer>
+
+    <script src="js/app.js"></script>
+    <script src="js/admin.js"></script>
+</body>
+</html>

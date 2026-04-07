@@ -1,0 +1,640 @@
+/* ============================================
+   TEMA MODERNO TERRA COTA - CASAMENTO
+   Design Elegante e Sofisticado
+   ============================================ */
+:root {
+    --terra-cota-primary: #D67A5A;      /* Terra Cota principal mais elegante */
+    --terra-cota-dark: #B55B3E;         /* Terra Cota escuro */
+    --terra-cota-light: #F5D5C8;        /* Terra Cota claro suave */
+    --terra-cota-bg: #FEF7F4;           /* Fundo off-white com tom quente */
+    --terra-cota-border: #E8C9BC;       /* Bordas suaves */
+    --text-dark: #3D2B1F;              /* Texto escuro - quase preto suave */
+    --text-light: #8B6B5C;             /* Texto claro */
+    --gold: #D4AF37;                   /* Toque dourado para elegância */
+    --gold-light: #F4E4BC;             /* Dourado claro */
+    --success: #7A9E7E;                /* Verde suave para disponível */
+    --danger: #D67A5A;                 /* Terra cota para comprado */
+    --shadow: 0 10px 30px rgba(0,0,0,0.08);
+    --shadow-hover: 0 15px 40px rgba(0,0,0,0.12);
+    --border-radius: 20px;
+}
+
+* {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+}
+
+body {
+    font-family: 'Poppins', 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+    background-color: var(--terra-cota-bg);
+    color: var(--text-dark);
+    line-height: 1.6;
+    overflow-x: hidden;
+}
+
+/* ============================================
+   DECORAÇÕES DE FUNDO
+   ============================================ */
+body::before {
+    content: '';
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background-image: url('data:image/svg+xml,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100"><path fill="%23D67A5A" fill-opacity="0.03" d="M50 10 L60 30 L80 30 L65 45 L70 65 L50 55 L30 65 L35 45 L20 30 L40 30 Z"/><circle cx="50" cy="50" r="15" fill="%23D67A5A" fill-opacity="0.03"/></svg>');
+    background-repeat: repeat;
+    background-size: 60px;
+    pointer-events: none;
+    z-index: -1;
+}
+
+/* ============================================
+   HEADER MODERNO COM ANIMAÇÃO
+   ============================================ */
+.hero {
+    background: linear-gradient(135deg, var(--terra-cota-primary) 0%, var(--terra-cota-dark) 100%);
+    color: white;
+    text-align: center;
+    padding: 80px 20px 100px;
+    position: relative;
+    overflow: hidden;
+    clip-path: polygon(0 0, 100% 0, 100% 85%, 0 100%);
+}
+
+.hero::before {
+    content: '✦';
+    position: absolute;
+    top: 20px;
+    left: 20px;
+    font-size: 100px;
+    opacity: 0.1;
+    animation: float 6s ease-in-out infinite;
+}
+
+.hero::after {
+    content: '✦';
+    position: absolute;
+    bottom: 20px;
+    right: 20px;
+    font-size: 100px;
+    opacity: 0.1;
+    animation: float 6s ease-in-out infinite reverse;
+}
+
+@keyframes float {
+    0%, 100% { transform: translateY(0px); }
+    50% { transform: translateY(-20px); }
+}
+
+.hero-content {
+    position: relative;
+    z-index: 2;
+    animation: fadeInUp 1s ease-out;
+}
+
+@keyframes fadeInUp {
+    from {
+        opacity: 0;
+        transform: translateY(30px);
+    }
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+.hero h1 {
+    font-size: 4rem;
+    margin-bottom: 20px;
+    font-weight: 400;
+    letter-spacing: 3px;
+    font-family: 'Playfair Display', serif;
+}
+
+.hero h1 i {
+    font-size: 2rem;
+    margin: 0 15px;
+    color: var(--gold);
+}
+
+.hero .date {
+    font-size: 1.3rem;
+    opacity: 0.95;
+    margin-bottom: 30px;
+    letter-spacing: 2px;
+    font-weight: 300;
+}
+
+.hero h2 {
+    font-size: 2.5rem;
+    margin: 30px 0 15px;
+    font-weight: 300;
+    font-family: 'Playfair Display', serif;
+}
+
+.hero .subtitle {
+    font-size: 1.1rem;
+    opacity: 0.9;
+    max-width: 600px;
+    margin: 0 auto;
+}
+
+/* ============================================
+   BOTÃO ADMIN MODERNO
+   ============================================ */
+.admin-toggle-btn {
+    position: fixed;
+    bottom: 30px;
+    right: 30px;
+    width: 55px;
+    height: 55px;
+    border-radius: 50%;
+    background: linear-gradient(135deg, var(--terra-cota-primary), var(--terra-cota-dark));
+    color: white;
+    border: none;
+    cursor: pointer;
+    box-shadow: var(--shadow);
+    transition: all 0.3s ease;
+    z-index: 1000;
+    font-size: 1.5rem;
+    backdrop-filter: blur(10px);
+    z-index: 1001;
+}
+
+.admin-toggle-btn:hover {
+    transform: scale(1.1) rotate(90deg);
+    box-shadow: var(--shadow-hover);
+}
+
+/* ============================================
+   MODAL ADMIN MODERNO
+   ============================================ */
+.modal {
+    display: none;
+    position: fixed;
+    z-index: 2000;
+    left: 0;
+    top: 0;
+    width: 100%;
+    height: 100%;
+    background-color: rgba(0,0,0,0.6);
+    backdrop-filter: blur(5px);
+    animation: fadeIn 0.3s;
+}
+
+@keyframes fadeIn {
+    from { opacity: 0; }
+    to { opacity: 1; }
+}
+
+.modal-content {
+    background: linear-gradient(135deg, #fff 0%, var(--terra-cota-bg) 100%);
+    margin: 50px auto;
+    width: 90%;
+    max-width: 600px;
+    border-radius: var(--border-radius);
+    box-shadow: var(--shadow-hover);
+    animation: slideDown 0.4s;
+    overflow: hidden;
+}
+
+@keyframes slideDown {
+    from {
+        transform: translateY(-50px);
+        opacity: 0;
+    }
+    to {
+        transform: translateY(0);
+        opacity: 1;
+    }
+}
+
+.modal-header {
+    background: linear-gradient(135deg, var(--terra-cota-primary), var(--terra-cota-dark));
+    color: white;
+    padding: 25px;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+}
+
+.modal-header h2 {
+    font-size: 1.5rem;
+    font-weight: 400;
+}
+
+.close-btn {
+    font-size: 32px;
+    font-weight: bold;
+    cursor: pointer;
+    transition: 0.3s;
+    width: 40px;
+    height: 40px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    border-radius: 50%;
+}
+
+.close-btn:hover {
+    background-color: rgba(255,255,255,0.2);
+    transform: rotate(90deg);
+}
+
+.modal-body {
+    padding: 30px;
+}
+
+.admin-tabs {
+    display: flex;
+    gap: 10px;
+    margin-bottom: 30px;
+    border-bottom: 2px solid var(--terra-cota-border);
+}
+
+.tab-btn {
+    padding: 12px 25px;
+    background: none;
+    border: none;
+    cursor: pointer;
+    font-size: 1rem;
+    color: var(--text-light);
+    transition: 0.3s;
+    font-weight: 500;
+    position: relative;
+}
+
+.tab-btn.active {
+    color: var(--terra-cota-primary);
+}
+
+.tab-btn.active::after {
+    content: '';
+    position: absolute;
+    bottom: -2px;
+    left: 0;
+    right: 0;
+    height: 2px;
+    background: var(--terra-cota-primary);
+}
+
+.tab-content {
+    display: none;
+    animation: fadeIn 0.3s;
+}
+
+.tab-content.active {
+    display: block;
+}
+
+.form-group {
+    margin-bottom: 25px;
+}
+
+.form-group label {
+    display: block;
+    margin-bottom: 10px;
+    font-weight: 600;
+    color: var(--text-dark);
+    font-size: 0.9rem;
+}
+
+.form-group input {
+    width: 100%;
+    padding: 12px 15px;
+    border: 2px solid var(--terra-cota-border);
+    border-radius: 12px;
+    font-size: 1rem;
+    transition: 0.3s;
+    background: white;
+}
+
+.form-group input:focus {
+    outline: none;
+    border-color: var(--terra-cota-primary);
+    box-shadow: 0 0 0 3px rgba(214, 122, 90, 0.1);
+}
+
+.btn-primary {
+    background: linear-gradient(135deg, var(--terra-cota-primary), var(--terra-cota-dark));
+    color: white;
+    padding: 14px 28px;
+    border: none;
+    border-radius: 12px;
+    cursor: pointer;
+    font-size: 1rem;
+    transition: 0.3s;
+    width: 100%;
+    font-weight: 600;
+    letter-spacing: 1px;
+}
+
+.btn-primary:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 5px 20px rgba(214, 122, 90, 0.4);
+}
+
+/* ============================================
+   FILTROS MODERNOS
+   ============================================ */
+.container {
+    max-width: 1300px;
+    margin: 0 auto;
+    padding: 60px 20px;
+}
+
+.filters {
+    display: flex;
+    justify-content: center;
+    gap: 15px;
+    margin-bottom: 50px;
+    flex-wrap: wrap;
+}
+
+.filter-btn {
+    padding: 12px 30px;
+    background: white;
+    border: 2px solid var(--terra-cota-border);
+    border-radius: 40px;
+    cursor: pointer;
+    transition: 0.3s;
+    font-size: 0.95rem;
+    color: var(--text-dark);
+    font-weight: 500;
+    letter-spacing: 0.5px;
+}
+
+.filter-btn.active,
+.filter-btn:hover {
+    background: linear-gradient(135deg, var(--terra-cota-primary), var(--terra-cota-dark));
+    border-color: transparent;
+    color: white;
+    transform: translateY(-2px);
+    box-shadow: 0 5px 15px rgba(214, 122, 90, 0.3);
+}
+
+/* ============================================
+   CARDS MODERNOS DOS PRESENTES
+   ============================================ */
+.presentes-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(320px, 1fr));
+    gap: 35px;
+}
+
+.presente-card {
+    background: white;
+    border-radius: var(--border-radius);
+    overflow: hidden;
+    box-shadow: var(--shadow);
+    transition: all 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+    position: relative;
+}
+
+.presente-card::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    height: 4px;
+    background: linear-gradient(90deg, var(--terra-cota-primary), var(--gold));
+    transform: scaleX(0);
+    transition: transform 0.3s;
+}
+
+.presente-card:hover {
+    transform: translateY(-10px);
+    box-shadow: var(--shadow-hover);
+}
+
+.presente-card:hover::before {
+    transform: scaleX(1);
+}
+
+.presente-imagem {
+    width: 100%;
+    height: 240px;
+    object-fit: cover;
+    transition: transform 0.5s;
+}
+
+.presente-card:hover .presente-imagem {
+    transform: scale(1.05);
+}
+
+.presente-info {
+    padding: 25px;
+    position: relative;
+}
+
+.presente-nome {
+    font-size: 1.25rem;
+    margin-bottom: 12px;
+    color: var(--text-dark);
+    font-weight: 600;
+    font-family: 'Playfair Display', serif;
+}
+
+.presente-preco {
+    font-size: 1.5rem;
+    font-weight: bold;
+    color: var(--terra-cota-primary);
+    margin-bottom: 15px;
+}
+
+.presente-preco::before {
+    content: 'R$ ';
+    font-size: 1rem;
+    font-weight: normal;
+}
+
+.presente-status {
+    display: inline-block;
+    padding: 6px 14px;
+    border-radius: 30px;
+    font-size: 0.8rem;
+    margin-bottom: 18px;
+    font-weight: 600;
+    letter-spacing: 0.5px;
+}
+
+.status-disponivel {
+    background: linear-gradient(135deg, var(--success), #6B8C5C);
+    color: white;
+}
+
+.status-comprado {
+    background: linear-gradient(135deg, var(--danger), var(--terra-cota-dark));
+    color: white;
+}
+
+.presente-link {
+    display: inline-block;
+    background: linear-gradient(135deg, var(--terra-cota-primary), var(--terra-cota-dark));
+    color: white;
+    padding: 12px 20px;
+    text-decoration: none;
+    border-radius: 12px;
+    transition: 0.3s;
+    width: 100%;
+    text-align: center;
+    font-weight: 500;
+    letter-spacing: 0.5px;
+}
+
+.presente-link:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 5px 15px rgba(214, 122, 90, 0.4);
+}
+
+.btn-comprar {
+    background: linear-gradient(135deg, var(--success), #5a7a4a);
+    margin-top: 12px;
+}
+
+.btn-comprado {
+    background: #ccc;
+    cursor: not-allowed;
+    opacity: 0.6;
+    transform: none;
+}
+
+/* ============================================
+   FOOTER MODERNO
+   ============================================ */
+footer {
+    background: linear-gradient(135deg, var(--terra-cota-dark), var(--text-dark));
+    color: white;
+    text-align: center;
+    padding: 40px;
+    margin-top: 60px;
+    position: relative;
+}
+
+footer::before {
+    content: '✦';
+    position: absolute;
+    top: -20px;
+    left: 50%;
+    transform: translateX(-50%);
+    font-size: 40px;
+    color: var(--gold);
+    background: var(--terra-cota-dark);
+    width: 60px;
+    height: 60px;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    line-height: 1;
+}
+
+footer p {
+    margin: 8px 0;
+    opacity: 0.9;
+}
+
+/* ============================================
+   ANIMAÇÕES E RESPONSIVIDADE
+   ============================================ */
+@keyframes pulse {
+    0%, 100% { transform: scale(1); }
+    50% { transform: scale(1.05); }
+}
+
+.loading {
+    text-align: center;
+    padding: 60px;
+    font-size: 1.2rem;
+    color: var(--text-light);
+}
+
+.loading::after {
+    content: '';
+    display: inline-block;
+    width: 20px;
+    height: 20px;
+    border: 3px solid var(--terra-cota-border);
+    border-top-color: var(--terra-cota-primary);
+    border-radius: 50%;
+    animation: spin 0.6s linear infinite;
+    margin-left: 10px;
+    vertical-align: middle;
+}
+
+@keyframes spin {
+    to { transform: rotate(360deg); }
+}
+
+@media (max-width: 768px) {
+    .hero h1 {
+        font-size: 2.5rem;
+    }
+    
+    .hero h1 i {
+        font-size: 1.5rem;
+        margin: 0 8px;
+    }
+    
+    .hero h2 {
+        font-size: 1.8rem;
+    }
+    
+    .hero .date {
+        font-size: 1rem;
+    }
+    
+    .presentes-grid {
+        grid-template-columns: 1fr;
+        gap: 25px;
+    }
+    
+    .modal-content {
+        width: 95%;
+        margin: 20px auto;
+    }
+    
+    .filters {
+        gap: 10px;
+    }
+    
+    .filter-btn {
+        padding: 8px 20px;
+        font-size: 0.85rem;
+    }
+}
+
+@media (max-width: 480px) {
+    .hero {
+        padding: 60px 20px 80px;
+    }
+    
+    .hero h1 {
+        font-size: 1.8rem;
+    }
+    
+    .container {
+        padding: 40px 15px;
+    }
+}
+
+/* Scrollbar personalizada */
+::-webkit-scrollbar {
+    width: 10px;
+}
+
+::-webkit-scrollbar-track {
+    background: var(--terra-cota-bg);
+}
+
+::-webkit-scrollbar-thumb {
+    background: var(--terra-cota-primary);
+    border-radius: 5px;
+}
+
+::-webkit-scrollbar-thumb:hover {
+    background: var(--terra-cota-dark);
+}

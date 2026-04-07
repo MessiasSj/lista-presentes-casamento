@@ -3,7 +3,7 @@
 // ============================================
 
 // Constantes
-const ADMIN_PASSWORD = 'NARA4598'; // Senha padrão - Mude após implantação!
+const ADMIN_PASSWORD = 'Nara@@4598'; // Senha padrão - Mude após implantação!
 let isAdminLoggedIn = false;
 
 // ============================================

@@ -142,6 +142,46 @@ body::before {
 }
 
 /* ============================================
+   CONTADOR REGRESSIVO
+   ============================================ */
+.countdown {
+    display: flex;
+    justify-content: center;
+    gap: 20px;
+    margin: 40px 0 30px;
+    flex-wrap: wrap;
+}
+
+.countdown-item {
+    background: rgba(255,255,255,0.15);
+    backdrop-filter: blur(10px);
+    padding: 15px 25px;
+    border-radius: 15px;
+    text-align: center;
+    min-width: 90px;
+    transition: transform 0.3s;
+}
+
+.countdown-item:hover {
+    transform: translateY(-5px);
+    background: rgba(255,255,255,0.25);
+}
+
+.countdown-item span {
+    font-size: 2rem;
+    font-weight: bold;
+    display: block;
+    font-family: 'Playfair Display', serif;
+}
+
+.countdown-item small {
+    font-size: 0.8rem;
+    opacity: 0.9;
+    text-transform: uppercase;
+    letter-spacing: 1px;
+}
+
+/* ============================================
    BOTÃO ADMIN MODERNO
    ============================================ */
 .admin-toggle-btn {
@@ -605,6 +645,19 @@ footer p {
         padding: 8px 20px;
         font-size: 0.85rem;
     }
+    
+    .countdown-item {
+        padding: 10px 15px;
+        min-width: 70px;
+    }
+    
+    .countdown-item span {
+        font-size: 1.5rem;
+    }
+    
+    .countdown-item small {
+        font-size: 0.7rem;
+    }
 }
 
 @media (max-width: 480px) {
@@ -637,32 +690,4 @@ footer p {
 
 ::-webkit-scrollbar-thumb:hover {
     background: var(--terra-cota-dark);
-}
-.countdown {
-    display: flex;
-    justify-content: center;
-    gap: 30px;
-    margin-top: 40px;
-    flex-wrap: wrap;
-}
-
-.countdown-item {
-    background: rgba(255,255,255,0.15);
-    backdrop-filter: blur(10px);
-    padding: 15px 25px;
-    border-radius: 15px;
-    text-align: center;
-    min-width: 80px;
-}
-
-.countdown-item span {
-    font-size: 2rem;
-    font-weight: bold;
-    display: block;
-    font-family: 'Playfair Display', serif;
-}
-
-.countdown-item small {
-    font-size: 0.8rem;
-    opacity: 0.9;
 }

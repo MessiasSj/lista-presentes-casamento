@@ -1,11 +1,143 @@
 // ============================================
 // APP.JS - Lista de Presentes de Casamento
-// Aysnara & Evandro - 06/05/2026
+// Com Sincronização na Nuvem (JSONBin.io)
 // ============================================
 
-const STORAGE_KEY = 'presentes_casamento';
+// CONFIGURAÇÕES DO JSONBIN (SUBSTITUA PELOS SEUS DADOS)
+const BIN_ID = 'SEU_BIN_ID_AQUI';  // Cole seu Bin ID aqui
+const API_KEY = 'SUA_API_KEY_AQUI'; // Cole sua API Key aqui
+
 let currentFilter = 'all';
 let presentes = [];
+
+// ============================================
+// FUNÇÕES DE SINCRONIZAÇÃO COM A NUVEM
+// ============================================
+
+// Carregar dados da nuvem
+async function carregarDaNuvem() {
+    try {
+        console.log("🔄 Carregando dados da nuvem...");
+        
+        const response = await fetch(`https://api.jsonbin.io/v3/b/${BIN_ID}/latest`, {
+            method: 'GET',
+            headers: {
+                'X-Master-Key': API_KEY,
+                'Content-Type': 'application/json'
+            }
+        });
+        
+        const data = await response.json();
+        
+        if (data.record && data.record.presentes) {
+            presentes = data.record.presentes;
+            console.log("✅ Dados carregados da nuvem:", presentes.length, "presentes");
+        } else {
+            console.log("⚠️ Nenhum dado encontrado, usando dados locais");
+            carregarDadosLocais();
+        }
+        
+        salvarNoLocalStorage();
+        renderPresentes();
+        
+    } catch(error) {
+        console.error("❌ Erro ao carregar da nuvem:", error);
+        console.log("📱 Usando dados do localStorage...");
+        carregarDadosLocais();
+        renderPresentes();
+    }
+}
+
+// Salvar dados na nuvem
+async function salvarNaNuvem() {
+    try {
+        console.log("💾 Salvando dados na nuvem...");
+        
+        const dadosParaSalvar = {
+            presentes: presentes,
+            ultimaAtualizacao: new Date().toISOString()
+        };
+        
+        const response = await fetch(`https://api.jsonbin.io/v3/b/${BIN_ID}`, {
+            method: 'PUT',
+            headers: {
+                'X-Master-Key': API_KEY,
+                'Content-Type': 'application/json'
+            },
+            body: JSON.stringify(dadosParaSalvar)
+        });
+        
+        if (response.ok) {
+            console.log("✅ Dados salvos na nuvem com sucesso!");
+        } else {
+            console.log("⚠️ Erro ao salvar na nuvem, mas dados estão salvos localmente");
+        }
+        
+    } catch(error) {
+        console.error("❌ Erro ao salvar na nuvem:", error);
+        console.log("📱 Dados salvos apenas no localStorage");
+    }
+}
+
+// Carregar dados locais (fallback)
+function carregarDadosLocais() {
+    const stored = localStorage.getItem('presentes_casamento');
+    
+    if (stored) {
+        presentes = JSON.parse(stored);
+        console.log("📱 Dados carregados do localStorage:", presentes.length, "presentes");
+    } else {
+        // Dados iniciais
+        presentes = [
+            {
+                id: 1,
+                nome: "Jogo de Panelas Antiaderentes",
+                url: "https://www.magazineluiza.com.br/",
+                preco: 299.90,
+                imagem: "https://via.placeholder.com/300x200/D67A5A/FFFFFF?text=Jogo+de+Panelas",
+                comprado: false,
+                comprador: null,
+                dataCompra: null
+            },
+            {
+                id: 2,
+                nome: "Kit Taças de Cristal",
+                url: "https://www.americanas.com.br/",
+                preco: 159.90,
+                imagem: "https://via.placeholder.com/300x200/D67A5A/FFFFFF?text=Taças+de+Cristal",
+                comprado: false,
+                comprador: null,
+                dataCompra: null
+            },
+            {
+                id: 3,
+                nome: "Jogo de Cama Casal 400 fios",
+                url: "https://www.mercadolivre.com.br/",
+                preco: 249.90,
+                imagem: "https://via.placeholder.com/300x200/D67A5A/FFFFFF?text=Jogo+de+Cama",
+                comprado: false,
+                comprador: null,
+                dataCompra: null
+            }
+        ];
+        console.log("📱 Dados iniciais criados no localStorage");
+    }
+    
+    salvarNoLocalStorage();
+}
+
+// Salvar no localStorage e sincronizar com nuvem
+function salvarNoLocalStorage() {
+    localStorage.setItem('presentes_casamento', JSON.stringify(presentes));
+    // Salvar também na nuvem (mas não esperar a resposta)
+    salvarNaNuvem();
+}
+
+// Função principal para salvar (usar em todas as alterações)
+async function salvarDados() {
+    localStorage.setItem('presentes_casamento', JSON.stringify(presentes));
+    await salvarNaNuvem();
+}
 
 // ============================================
 // CONTADOR REGRESSIVO
@@ -48,51 +180,7 @@ function iniciarContador() {
 // ============================================
 
 function loadPresentes() {
-    const stored = localStorage.getItem(STORAGE_KEY);
-    
-    if (stored) {
-        presentes = JSON.parse(stored);
-    } else {
-        presentes = [
-            {
-                id: 1,
-                nome: "Jogo de Panelas Antiaderentes",
-                url: "https://www.magazineluiza.com.br/",
-                preco: 299.90,
-                imagem: "https://via.placeholder.com/300x200/D67A5A/FFFFFF?text=Jogo+de+Panelas",
-                comprado: false,
-                comprador: null,
-                dataCompra: null
-            },
-            {
-                id: 2,
-                nome: "Kit Taças de Cristal",
-                url: "https://www.americanas.com.br/",
-                preco: 159.90,
-                imagem: "https://via.placeholder.com/300x200/D67A5A/FFFFFF?text=Taças+de+Cristal",
-                comprado: false,
-                comprador: null,
-                dataCompra: null
-            },
-            {
-                id: 3,
-                nome: "Jogo de Cama Casal 400 fios",
-                url: "https://www.mercadolivre.com.br/",
-                preco: 249.90,
-                imagem: "https://via.placeholder.com/300x200/D67A5A/FFFFFF?text=Jogo+de+Cama",
-                comprado: false,
-                comprador: null,
-                dataCompra: null
-            }
-        ];
-        savePresentes();
-    }
-    
-    renderPresentes();
-}
-
-function savePresentes() {
-    localStorage.setItem(STORAGE_KEY, JSON.stringify(presentes));
+    carregarDaNuvem();
 }
 
 function renderPresentes() {
@@ -142,7 +230,7 @@ function renderPresentes() {
     `).join('');
 }
 
-window.marcarComoComprado = function(id) {
+window.marcarComoComprado = async function(id) {
     const presente = presentes.find(p => p.id === id);
     if (!presente || presente.comprado) return;
     
@@ -152,12 +240,12 @@ window.marcarComoComprado = function(id) {
         presente.comprado = true;
         presente.comprador = compradorNome.trim();
         presente.dataCompra = new Date().toISOString();
-        savePresentes();
+        
+        await salvarDados();
         renderPresentes();
         
         alert(`✅ Obrigado ${compradorNome}!\n\n🎁 Presente: ${presente.nome}\n💰 Valor: R$ ${presente.preco.toFixed(2)}\n\nSua gentileza foi registrada com sucesso!`);
         
-        // Se o admin estiver logado e a aba de compras estiver aberta, atualiza
         if (typeof renderPurchasedList === 'function') {
             renderPurchasedList();
         }

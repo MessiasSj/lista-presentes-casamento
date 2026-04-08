@@ -8,36 +8,48 @@ let currentFilter = 'all';
 let presentes = [];
 
 // ============================================
-// CONTADOR REGRESSIVO
+// CONTADOR REGRESSIVO - VERSÃO CORRIGIDA
 // ============================================
 
 function iniciarContador() {
-    const countdownElement = document.getElementById('countdown');
-    if (!countdownElement) return;
+    console.log("Iniciando contador..."); // Para debug
+    
+    // Verificar se os elementos existem
+    const daysElem = document.getElementById('days');
+    if (!daysElem) {
+        console.log("Elementos do contador não encontrados!");
+        return;
+    }
     
     function atualizarContador() {
-        // Data: 06 de Maio de 2026, às 16:00
-        const dataCasamento = new Date(2026, 4, 6, 16, 0, 0);
-        const agora = new Date();
-        const diferenca = dataCasamento - agora;
-        
-        if (diferenca <= 0) {
-            document.getElementById('days').textContent = '00';
-            document.getElementById('hours').textContent = '00';
-            document.getElementById('minutes').textContent = '00';
-            document.getElementById('seconds').textContent = '00';
-            return;
+        try {
+            // Data: 06 de Maio de 2026, às 16:00
+            const dataCasamento = new Date(2026, 4, 6, 16, 0, 0);
+            const agora = new Date();
+            const diferenca = dataCasamento - agora;
+            
+            if (diferenca <= 0) {
+                document.getElementById('days').textContent = '00';
+                document.getElementById('hours').textContent = '00';
+                document.getElementById('minutes').textContent = '00';
+                document.getElementById('seconds').textContent = '00';
+                return;
+            }
+            
+            const dias = Math.floor(diferenca / (1000 * 60 * 60 * 24));
+            const horas = Math.floor((diferenca % (1000 * 60 * 60 * 24)) / (1000 * 60 * 60));
+            const minutos = Math.floor((diferenca % (1000 * 60 * 60)) / (1000 * 60));
+            const segundos = Math.floor((diferenca % (1000 * 60)) / 1000);
+            
+            document.getElementById('days').textContent = String(dias).padStart(2, '0');
+            document.getElementById('hours').textContent = String(horas).padStart(2, '0');
+            document.getElementById('minutes').textContent = String(minutos).padStart(2, '0');
+            document.getElementById('seconds').textContent = String(segundos).padStart(2, '0');
+            
+            console.log("Contador atualizado:", dias, "dias");
+        } catch(error) {
+            console.log("Erro no contador:", error);
         }
-        
-        const dias = Math.floor(diferenca / (1000 * 60 * 60 * 24));
-        const horas = Math.floor((diferenca % (1000 * 60 * 60 * 24)) / (1000 * 60 * 60));
-        const minutos = Math.floor((diferenca % (1000 * 60 * 60)) / (1000 * 60));
-        const segundos = Math.floor((diferenca % (1000 * 60)) / 1000);
-        
-        document.getElementById('days').textContent = String(dias).padStart(2, '0');
-        document.getElementById('hours').textContent = String(horas).padStart(2, '0');
-        document.getElementById('minutes').textContent = String(minutos).padStart(2, '0');
-        document.getElementById('seconds').textContent = String(segundos).padStart(2, '0');
     }
     
     atualizarContador();
@@ -45,60 +57,75 @@ function iniciarContador() {
 }
 
 // ============================================
-// FUNÇÕES DOS PRESENTES
+// FUNÇÕES DOS PRESENTES - VERSÃO CORRIGIDA
 // ============================================
 
 function loadPresentes() {
-    const stored = localStorage.getItem(STORAGE_KEY);
+    console.log("Carregando presentes...");
     
-    if (stored) {
-        presentes = JSON.parse(stored);
-    } else {
-        presentes = [
-            {
-                id: 1,
-                nome: "Jogo de Panelas Antiaderentes",
-                url: "https://www.magazineluiza.com.br/",
-                preco: 299.90,
-                imagem: "https://via.placeholder.com/300x200/D67A5A/FFFFFF?text=Jogo+de+Panelas",
-                comprado: false,
-                comprador: null,
-                dataCompra: null
-            },
-            {
-                id: 2,
-                nome: "Kit Taças de Cristal",
-                url: "https://www.americanas.com.br/",
-                preco: 159.90,
-                imagem: "https://via.placeholder.com/300x200/D67A5A/FFFFFF?text=Taças+de+Cristal",
-                comprado: false,
-                comprador: null,
-                dataCompra: null
-            },
-            {
-                id: 3,
-                nome: "Jogo de Cama Casal 400 fios",
-                url: "https://www.mercadolivre.com.br/",
-                preco: 249.90,
-                imagem: "https://via.placeholder.com/300x200/D67A5A/FFFFFF?text=Jogo+de+Cama",
-                comprado: false,
-                comprador: null,
-                dataCompra: null
-            }
-        ];
-        savePresentes();
+    try {
+        const stored = localStorage.getItem(STORAGE_KEY);
+        
+        if (stored) {
+            presentes = JSON.parse(stored);
+            console.log("Presentes carregados do localStorage:", presentes.length);
+        } else {
+            // Dados iniciais
+            presentes = [
+                {
+                    id: 1,
+                    nome: "Jogo de Panelas Antiaderentes",
+                    url: "https://www.magazineluiza.com.br/",
+                    preco: 299.90,
+                    imagem: "https://via.placeholder.com/300x200/D67A5A/FFFFFF?text=Jogo+de+Panelas",
+                    comprado: false,
+                    comprador: null,
+                    dataCompra: null
+                },
+                {
+                    id: 2,
+                    nome: "Kit Taças de Cristal",
+                    url: "https://www.americanas.com.br/",
+                    preco: 159.90,
+                    imagem: "https://via.placeholder.com/300x200/D67A5A/FFFFFF?text=Taças+de+Cristal",
+                    comprado: false,
+                    comprador: null,
+                    dataCompra: null
+                },
+                {
+                    id: 3,
+                    nome: "Jogo de Cama Casal 400 fios",
+                    url: "https://www.mercadolivre.com.br/",
+                    preco: 249.90,
+                    imagem: "https://via.placeholder.com/300x200/D67A5A/FFFFFF?text=Jogo+de+Cama",
+                    comprado: false,
+                    comprador: null,
+                    dataCompra: null
+                }
+            ];
+            savePresentes();
+            console.log("Dados iniciais criados");
+        }
+        
+        renderPresentes();
+    } catch(error) {
+        console.log("Erro ao carregar presentes:", error);
     }
-    
-    renderPresentes();
 }
 
 function savePresentes() {
     localStorage.setItem(STORAGE_KEY, JSON.stringify(presentes));
+    console.log("Presentes salvos");
 }
 
 function renderPresentes() {
     const container = document.getElementById('presentesList');
-    if (!container) return;
+    if (!container) {
+        console.log("Container 'presentesList' não encontrado!");
+        return;
+    }
+    
+    console.log("Renderizando presentes, total:", presentes.length);
     
     let filteredPresentes = presentes;
     if (currentFilter === 'available') {
@@ -120,7 +147,7 @@ function renderPresentes() {
                  onerror="this.src='https://via.placeholder.com/300x200/E8C9BC/4A3728?text=Imagem+não+disponível'">
             <div class="presente-info">
                 <h3 class="presente-nome">${escapeHtml(presente.nome)}</h3>
-                <p class="presente-preco">${presente.preco.toFixed(2)}</p>
+                <p class="presente-preco">R$ ${presente.preco.toFixed(2)}</p>
                 <span class="presente-status ${presente.comprado ? 'status-comprado' : 'status-disponivel'}">
                     ${presente.comprado ? '✓ Comprado' : '✓ Disponível'}
                 </span>
@@ -141,9 +168,13 @@ function renderPresentes() {
             </div>
         </div>
     `).join('');
+    
+    console.log("Renderização concluída");
 }
 
 window.marcarComoComprado = function(id) {
+    console.log("Marcando como comprado:", id);
+    
     const presente = presentes.find(p => p.id === id);
     if (!presente || presente.comprado) return;
     
@@ -184,6 +215,7 @@ function setupFilters() {
 // INICIALIZAÇÃO
 // ============================================
 document.addEventListener('DOMContentLoaded', () => {
+    console.log("Página carregada, iniciando...");
     iniciarContador();
     loadPresentes();
     setupFilters();

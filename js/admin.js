@@ -3,7 +3,7 @@
 // CORRIGIDO: Exclusão e Adição funcionando
 // ============================================
 
-const ADMIN_PASSWORD = 'admin123';
+const ADMIN_PASSWORD = 'nara1234';
 let isAdminLoggedIn = false;
 
 // Elementos do DOM

@@ -8,6 +8,7 @@
 const BIN_ID = '69d5a3f2aaba882197d4e4b5';
 const API_KEY = '$2a$10$Q3UOEobQ/12x0P8MZMorteJ/zniJLV0pSy2.xtaaTjzKT5g87oML6';
 
+// Variáveis globais
 let currentFilter = 'all';
 let presentes = [];
 
@@ -28,25 +29,24 @@ async function carregarDaNuvem() {
             }
         });
         
+        if (!response.ok) throw new Error('Falha na requisição');
+        
         const data = await response.json();
         
-        if (data.record && data.record.presentes) {
+        if (data.record && data.record.presentes && data.record.presentes.length > 0) {
             presentes = data.record.presentes;
             console.log("✅ Dados carregados da nuvem:", presentes.length, "presentes");
         } else {
-            console.log("⚠️ Nenhum dado encontrado, usando dados locais");
+            console.log("⚠️ Nenhum dado encontrado na nuvem, usando dados locais");
             carregarDadosLocais();
         }
         
         salvarNoLocalStorage();
         renderPresentes();
         
-        // Atualizar admin se estiver aberto
-        if (typeof renderAdminPresentesList === 'function') {
-            renderAdminPresentesList();
-        }
-        if (typeof renderPurchasedList === 'function') {
-            renderPurchasedList();
+        // Atualizar admin se estiver logado
+        if (typeof window.atualizarAdmin === 'function') {
+            window.atualizarAdmin();
         }
         
     } catch(error) {
@@ -98,7 +98,7 @@ function carregarDadosLocais() {
         // Dados iniciais
         presentes = [
             {
-                id: 1,
+                id: Date.now() + 1,
                 nome: "Jogo de Panelas Antiaderentes",
                 url: "https://www.magazineluiza.com.br/",
                 preco: 299.90,
@@ -108,7 +108,7 @@ function carregarDadosLocais() {
                 dataCompra: null
             },
             {
-                id: 2,
+                id: Date.now() + 2,
                 nome: "Kit Taças de Cristal",
                 url: "https://www.americanas.com.br/",
                 preco: 159.90,
@@ -118,7 +118,7 @@ function carregarDadosLocais() {
                 dataCompra: null
             },
             {
-                id: 3,
+                id: Date.now() + 3,
                 nome: "Jogo de Cama Casal 400 fios",
                 url: "https://www.mercadolivre.com.br/",
                 preco: 249.90,
@@ -128,30 +128,26 @@ function carregarDadosLocais() {
                 dataCompra: null
             }
         ];
-        console.log("📱 Dados iniciais criados no localStorage");
+        console.log("📱 Dados iniciais criados");
     }
     
     salvarNoLocalStorage();
 }
 
-// Salvar no localStorage e sincronizar com nuvem
+// Salvar no localStorage
 function salvarNoLocalStorage() {
     localStorage.setItem('presentes_casamento', JSON.stringify(presentes));
-    salvarNaNuvem();
 }
 
-// Função global para salvar dados
+// Função global para salvar dados (usada pelo admin)
 window.salvarDadosGlobal = async function() {
-    localStorage.setItem('presentes_casamento', JSON.stringify(presentes));
+    salvarNoLocalStorage();
     await salvarNaNuvem();
-    
-    // Atualizar interfaces
     renderPresentes();
-    if (typeof renderAdminPresentesList === 'function') {
-        renderAdminPresentesList();
-    }
-    if (typeof renderPurchasedList === 'function') {
-        renderPurchasedList();
+    
+    // Atualizar admin se necessário
+    if (typeof window.atualizarAdmin === 'function') {
+        window.atualizarAdmin();
     }
 };
 
@@ -285,6 +281,13 @@ function setupFilters() {
         });
     });
 }
+
+// Exportar variáveis para admin.js
+window.getPresentes = () => presentes;
+window.setPresentes = (novaLista) => {
+    presentes = novaLista;
+    salvarNoLocalStorage();
+};
 
 // ============================================
 // INICIALIZAÇÃO

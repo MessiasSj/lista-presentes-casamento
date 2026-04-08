@@ -46,7 +46,7 @@
         <i class="fas fa-cog"></i>
     </button>
 
-    <!-- Modal Admin (inicialmente oculto) -->
+    <!-- Modal Admin -->
     <div id="adminModal" class="modal">
         <div class="modal-content">
             <div class="modal-header">
@@ -57,6 +57,7 @@
                 <div class="admin-tabs">
                     <button class="tab-btn active" data-tab="login">Login</button>
                     <button class="tab-btn" data-tab="manage">Gerenciar Presentes</button>
+                    <button class="tab-btn" data-tab="purchased">Compras Realizadas</button>
                 </div>
                 
                 <!-- Aba de Login -->
@@ -71,31 +72,44 @@
 
                 <!-- Aba de Gerenciamento -->
                 <div id="manageTab" class="tab-content">
-                    <h3>Adicionar Novo Presente</h3>
+                    <h3>✨ Adicionar Novo Presente</h3>
                     <form id="addPresenteForm">
                         <div class="form-group">
-                            <label for="produtoNome">Nome do Produto:</label>
-                            <input type="text" id="produtoNome" required>
+                            <label for="produtoNome">📦 Nome do Produto:</label>
+                            <input type="text" id="produtoNome" required placeholder="Ex: Jogo de Panelas Tramontina">
                         </div>
                         <div class="form-group">
-                            <label for="produtoUrl">URL da Loja:</label>
+                            <label for="produtoUrl">🔗 URL da Loja:</label>
                             <input type="url" id="produtoUrl" placeholder="https://www.exemplo.com/produto" required>
                         </div>
                         <div class="form-group">
-                            <label for="produtoPreco">Preço (R$):</label>
-                            <input type="number" id="produtoPreco" step="0.01" required>
+                            <label for="produtoPreco">💰 Preço (R$):</label>
+                            <input type="number" id="produtoPreco" step="0.01" required placeholder="Ex: 299.90">
                         </div>
                         <div class="form-group">
-                            <label for="produtoImagem">URL da Imagem (opcional):</label>
+                            <label for="produtoImagem">🖼️ URL da Imagem (opcional):</label>
                             <input type="url" id="produtoImagem" placeholder="https://www.exemplo.com/imagem.jpg">
                         </div>
-                        <button type="submit" class="btn-primary">Adicionar Presente</button>
+                        <div class="form-group">
+                            <label for="produtoImagemFile">📁 OU Enviar imagem do computador:</label>
+                            <input type="file" id="produtoImagemFile" accept="image/*">
+                            <small style="color: var(--text-light);">Formatos: JPG, PNG, GIF</small>
+                        </div>
+                        <button type="submit" class="btn-primary">
+                            <i class="fas fa-plus-circle"></i> Adicionar Presente
+                        </button>
                     </form>
 
                     <hr>
 
-                    <h3>Presentes Cadastrados</h3>
+                    <h3>🎁 Todos os Presentes Cadastrados</h3>
                     <div id="adminPresentesList"></div>
+                </div>
+
+                <!-- Aba de Compras Realizadas -->
+                <div id="purchasedTab" class="tab-content">
+                    <h3>📋 Presentes Já Comprados</h3>
+                    <div id="purchasedList"></div>
                 </div>
             </div>
         </div>
@@ -110,7 +124,6 @@
         </div>
         
         <div id="presentesList" class="presentes-grid">
-            <!-- Os presentes serão carregados aqui via JavaScript -->
             <div class="loading">Carregando presentes...</div>
         </div>
     </main>
@@ -119,6 +132,7 @@
     <footer>
         <p>© 2026 Aysnara & Evandro - Lista de Presentes de Casamento</p>
         <p>Presentes adicionados via links das lojas oficiais</p>
+        <p>Site criado por Evandro Messias</p>
     </footer>
 
     <script src="js/app.js"></script>

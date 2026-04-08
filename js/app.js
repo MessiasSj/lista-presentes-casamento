@@ -1,11 +1,12 @@
 // ============================================
 // APP.JS - Lista de Presentes de Casamento
+// Aysnara & Evandro - 06/05/2026
 // Com Sincronização na Nuvem (JSONBin.io)
 // ============================================
 
-// CONFIGURAÇÕES DO JSONBIN (SUBSTITUA PELOS SEUS DADOS)
-const BIN_ID = 'SEU_BIN_ID_AQUI';  // Cole seu Bin ID aqui
-const API_KEY = 'SUA_API_KEY_AQUI'; // Cole sua API Key aqui
+// CONFIGURAÇÕES DO JSONBIN
+const BIN_ID = '69d5a3f2aaba882197d4e4b5';
+const API_KEY = '$2a$10$Q3UOEobQ/12x0P8MZMorteJ/zniJLV0pSy2.xtaaTjzKT5g87oML6';
 
 let currentFilter = 'all';
 let presentes = [];
@@ -40,6 +41,14 @@ async function carregarDaNuvem() {
         salvarNoLocalStorage();
         renderPresentes();
         
+        // Atualizar admin se estiver aberto
+        if (typeof renderAdminPresentesList === 'function') {
+            renderAdminPresentesList();
+        }
+        if (typeof renderPurchasedList === 'function') {
+            renderPurchasedList();
+        }
+        
     } catch(error) {
         console.error("❌ Erro ao carregar da nuvem:", error);
         console.log("📱 Usando dados do localStorage...");
@@ -70,12 +79,11 @@ async function salvarNaNuvem() {
         if (response.ok) {
             console.log("✅ Dados salvos na nuvem com sucesso!");
         } else {
-            console.log("⚠️ Erro ao salvar na nuvem, mas dados estão salvos localmente");
+            console.log("⚠️ Erro ao salvar na nuvem");
         }
         
     } catch(error) {
         console.error("❌ Erro ao salvar na nuvem:", error);
-        console.log("📱 Dados salvos apenas no localStorage");
     }
 }
 
@@ -129,15 +137,23 @@ function carregarDadosLocais() {
 // Salvar no localStorage e sincronizar com nuvem
 function salvarNoLocalStorage() {
     localStorage.setItem('presentes_casamento', JSON.stringify(presentes));
-    // Salvar também na nuvem (mas não esperar a resposta)
     salvarNaNuvem();
 }
 
-// Função principal para salvar (usar em todas as alterações)
-async function salvarDados() {
+// Função global para salvar dados
+window.salvarDadosGlobal = async function() {
     localStorage.setItem('presentes_casamento', JSON.stringify(presentes));
     await salvarNaNuvem();
-}
+    
+    // Atualizar interfaces
+    renderPresentes();
+    if (typeof renderAdminPresentesList === 'function') {
+        renderAdminPresentesList();
+    }
+    if (typeof renderPurchasedList === 'function') {
+        renderPurchasedList();
+    }
+};
 
 // ============================================
 // CONTADOR REGRESSIVO
@@ -207,7 +223,7 @@ function renderPresentes() {
                  onerror="this.src='https://via.placeholder.com/300x200/E8C9BC/4A3728?text=Imagem+não+disponível'">
             <div class="presente-info">
                 <h3 class="presente-nome">${escapeHtml(presente.nome)}</h3>
-                <p class="presente-preco">${presente.preco.toFixed(2)}</p>
+                <p class="presente-preco">R$ ${presente.preco.toFixed(2)}</p>
                 <span class="presente-status ${presente.comprado ? 'status-comprado' : 'status-disponivel'}">
                     ${presente.comprado ? '✓ Comprado' : '✓ Disponível'}
                 </span>
@@ -241,23 +257,17 @@ window.marcarComoComprado = async function(id) {
         presente.comprador = compradorNome.trim();
         presente.dataCompra = new Date().toISOString();
         
-        await salvarDados();
-        renderPresentes();
+        await window.salvarDadosGlobal();
         
         alert(`✅ Obrigado ${compradorNome}!\n\n🎁 Presente: ${presente.nome}\n💰 Valor: R$ ${presente.preco.toFixed(2)}\n\nSua gentileza foi registrada com sucesso!`);
         
-        if (typeof renderPurchasedList === 'function') {
-            renderPurchasedList();
-        }
-        if (typeof renderAdminPresentesList === 'function') {
-            renderAdminPresentesList();
-        }
     } else if (compradorNome === '') {
         alert('❌ Por favor, digite seu nome para confirmar a compra.');
     }
 };
 
 function escapeHtml(text) {
+    if (!text) return '';
     const div = document.createElement('div');
     div.textContent = text;
     return div.innerHTML;

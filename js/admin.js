@@ -1,6 +1,6 @@
 // ============================================
 // ADMIN.JS - Área Administrativa
-// Com Sincronização na Nuvem (JSONBin.io)
+// Sincronização com Sheet.best
 // ============================================
 
 const ADMIN_PASSWORD = 'admin123';
@@ -140,10 +140,10 @@ function renderAdminPresentesList() {
                         ${presente.comprado ? `
                             <p style="margin: 8px 0; font-size: 0.75rem; background: #FEF7F4; padding: 8px; border-radius: 8px;">
                                 <i class="fas fa-user"></i> <strong>Comprado por:</strong> ${escapeHtml(presente.comprador || 'Anônimo')}<br>
-                                <i class="fas fa-calendar"></i> <strong>Data:</strong> ${new Date(presente.dataCompra).toLocaleDateString('pt-BR')}
+                                <i class="fas fa-calendar"></i> <strong>Data:</strong> ${presente.dataCompra ? new Date(presente.dataCompra).toLocaleDateString('pt-BR') : 'Não registrada'}
                             </p>
                         ` : ''}
-                        <button onclick="deletePresente(${presente.id})" 
+                        <button onclick="deletePresente('${presente.id}')" 
                                 style="margin-top: 10px; width: 100%; padding: 8px; background: linear-gradient(135deg, #D67A5A, #B55B3E); color: white; border: none; border-radius: 8px; cursor: pointer;">
                             <i class="fas fa-trash"></i> Excluir Presente
                         </button>
@@ -185,7 +185,7 @@ function renderPurchasedList() {
                                 <i class="fas fa-user"></i> Comprado por: <strong>${escapeHtml(presente.comprador || 'Anônimo')}</strong>
                             </p>
                             <p style="margin: 3px 0; font-size: 0.8rem; color: var(--text-light);">
-                                <i class="fas fa-calendar"></i> Data: ${new Date(presente.dataCompra).toLocaleDateString('pt-BR')} às ${new Date(presente.dataCompra).toLocaleTimeString('pt-BR')}
+                                <i class="fas fa-calendar"></i> Data: ${presente.dataCompra ? new Date(presente.dataCompra).toLocaleDateString('pt-BR') : 'Não registrada'}
                             </p>
                         </div>
                     </div>
@@ -242,11 +242,11 @@ async function addPresente(event) {
     let presentes = window.getPresentes ? window.getPresentes() : [];
     
     const newPresente = {
-        id: Date.now(),
+        id: Date.now().toString(),
         nome: nome,
         url: url,
         preco: preco,
-        imagem: imagemFinal || null,
+        imagem: imagemFinal || '',
         comprado: false,
         comprador: null,
         dataCompra: null
@@ -287,7 +287,7 @@ window.deletePresente = async function(id) {
     
     if (confirm('⚠️ Tem certeza que deseja excluir este presente permanentemente?')) {
         let presentes = window.getPresentes ? window.getPresentes() : [];
-        presentes = presentes.filter(p => p.id !== id);
+        presentes = presentes.filter(p => String(p.id) !== String(id));
         
         if (window.setPresentes) {
             window.setPresentes(presentes);

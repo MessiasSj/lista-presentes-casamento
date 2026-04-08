@@ -16,7 +16,7 @@ function iniciarContador() {
     if (!countdownElement) return;
     
     function atualizarContador() {
-        // Data: 06 de Maio de 2026, 16:00
+        // Data: 06 de Maio de 2026, às 16:00
         const dataCasamento = new Date(2026, 4, 6, 16, 0, 0);
         const agora = new Date();
         const diferenca = dataCasamento - agora;

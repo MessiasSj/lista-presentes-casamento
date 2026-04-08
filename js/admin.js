@@ -1,6 +1,6 @@
 // ============================================
 // ADMIN.JS - Área Administrativa
-// Sincronização com Sheet.best
+// CORRIGIDO: Exclusão e Adição funcionando
 // ============================================
 
 const ADMIN_PASSWORD = 'admin123';
@@ -122,9 +122,14 @@ function renderAdminPresentesList() {
         return;
     }
     
+    // Mostra apenas os disponíveis (não comprados) para o admin gerenciar
+    const disponiveis = presentes.filter(p => !p.comprado);
+    const comprados = presentes.filter(p => p.comprado);
+    
     container.innerHTML = `
-        <div style="display: grid; grid-template-columns: repeat(auto-fill, minmax(280px, 1fr)); gap: 20px; margin-top: 20px;">
-            ${presentes.map(presente => `
+        <h4 style="margin: 15px 0 10px 0;">📦 Disponíveis (${disponiveis.length})</h4>
+        <div style="display: grid; grid-template-columns: repeat(auto-fill, minmax(280px, 1fr)); gap: 20px; margin-bottom: 30px;">
+            ${disponiveis.map(presente => `
                 <div style="background: white; border-radius: 15px; overflow: hidden; box-shadow: 0 2px 8px rgba(0,0,0,0.1);">
                     <img src="${presente.imagem || 'https://via.placeholder.com/280x160/D67A5A/FFFFFF?text=Sem+Imagem'}" 
                          style="width: 100%; height: 160px; object-fit: cover;"
@@ -133,16 +138,10 @@ function renderAdminPresentesList() {
                         <h4 style="margin: 0 0 8px 0; color: var(--text-dark);">${escapeHtml(presente.nome)}</h4>
                         <p style="margin: 5px 0; color: var(--terra-cota-primary); font-weight: bold;">R$ ${presente.preco.toFixed(2)}</p>
                         <p style="margin: 5px 0; font-size: 0.85rem;">
-                            <span style="display: inline-block; padding: 3px 10px; border-radius: 12px; background: ${presente.comprado ? '#D67A5A' : '#7A9E7E'}; color: white;">
-                                ${presente.comprado ? 'COMPRADO' : 'DISPONÍVEL'}
+                            <span style="display: inline-block; padding: 3px 10px; border-radius: 12px; background: #7A9E7E; color: white;">
+                                DISPONÍVEL
                             </span>
                         </p>
-                        ${presente.comprado ? `
-                            <p style="margin: 8px 0; font-size: 0.75rem; background: #FEF7F4; padding: 8px; border-radius: 8px;">
-                                <i class="fas fa-user"></i> <strong>Comprado por:</strong> ${escapeHtml(presente.comprador || 'Anônimo')}<br>
-                                <i class="fas fa-calendar"></i> <strong>Data:</strong> ${presente.dataCompra ? new Date(presente.dataCompra).toLocaleDateString('pt-BR') : 'Não registrada'}
-                            </p>
-                        ` : ''}
                         <button onclick="deletePresente('${presente.id}')" 
                                 style="margin-top: 10px; width: 100%; padding: 8px; background: linear-gradient(135deg, #D67A5A, #B55B3E); color: white; border: none; border-radius: 8px; cursor: pointer;">
                             <i class="fas fa-trash"></i> Excluir Presente
@@ -151,6 +150,32 @@ function renderAdminPresentesList() {
                 </div>
             `).join('')}
         </div>
+        
+        ${comprados.length > 0 ? `
+            <h4 style="margin: 15px 0 10px 0;">✅ Já Comprados (${comprados.length})</h4>
+            <div style="display: grid; grid-template-columns: repeat(auto-fill, minmax(280px, 1fr)); gap: 20px; opacity: 0.7;">
+                ${comprados.map(presente => `
+                    <div style="background: white; border-radius: 15px; overflow: hidden; box-shadow: 0 2px 8px rgba(0,0,0,0.1);">
+                        <img src="${presente.imagem || 'https://via.placeholder.com/280x160/D67A5A/FFFFFF?text=Sem+Imagem'}" 
+                             style="width: 100%; height: 160px; object-fit: cover; filter: grayscale(0.3);"
+                             onerror="this.src='https://via.placeholder.com/280x160/D67A5A/FFFFFF?text=Imagem+não+disponível'">
+                        <div style="padding: 15px;">
+                            <h4 style="margin: 0 0 8px 0; color: var(--text-dark);">${escapeHtml(presente.nome)}</h4>
+                            <p style="margin: 5px 0; color: var(--terra-cota-primary); font-weight: bold;">R$ ${presente.preco.toFixed(2)}</p>
+                            <p style="margin: 5px 0; font-size: 0.85rem;">
+                                <span style="display: inline-block; padding: 3px 10px; border-radius: 12px; background: #D67A5A; color: white;">
+                                    COMPRADO
+                                </span>
+                            </p>
+                            <p style="margin: 8px 0; font-size: 0.75rem; background: #FEF7F4; padding: 8px; border-radius: 8px;">
+                                <i class="fas fa-user"></i> <strong>Comprado por:</strong> ${escapeHtml(presente.comprador || 'Anônimo')}<br>
+                                <i class="fas fa-calendar"></i> <strong>Data:</strong> ${presente.dataCompra ? new Date(presente.dataCompra).toLocaleDateString('pt-BR') : 'Não registrada'}
+                            </p>
+                        </div>
+                    </div>
+                `).join('')}
+            </div>
+        ` : ''}
     `;
 }
 
@@ -272,7 +297,7 @@ async function addPresente(event) {
     renderAdminPresentesList();
     renderPurchasedList();
     
-    alert('✅ Presente adicionado com sucesso!');
+    alert(`✅ Presente "${nome}" adicionado com sucesso!`);
 }
 
 // ============================================
@@ -285,8 +310,16 @@ window.deletePresente = async function(id) {
         return;
     }
     
-    if (confirm('⚠️ Tem certeza que deseja excluir este presente permanentemente?')) {
-        let presentes = window.getPresentes ? window.getPresentes() : [];
+    // Encontrar o nome do presente para confirmar
+    let presentes = window.getPresentes ? window.getPresentes() : [];
+    const presente = presentes.find(p => String(p.id) === String(id));
+    
+    if (!presente) {
+        alert('Presente não encontrado!');
+        return;
+    }
+    
+    if (confirm(`⚠️ Tem certeza que deseja excluir o presente "${presente.nome}" permanentemente?`)) {
         presentes = presentes.filter(p => String(p.id) !== String(id));
         
         if (window.setPresentes) {
@@ -296,12 +329,13 @@ window.deletePresente = async function(id) {
         // Salvar na nuvem
         if (typeof window.salvarDadosGlobal === 'function') {
             await window.salvarDadosGlobal();
+            console.log("✅ Presente excluído e sincronizado!");
         }
         
         renderAdminPresentesList();
         renderPurchasedList();
         
-        alert('✅ Presente excluído com sucesso!');
+        alert(`✅ Presente "${presente.nome}" excluído com sucesso!`);
     }
 };
 

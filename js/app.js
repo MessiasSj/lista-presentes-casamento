@@ -1,9 +1,10 @@
 // ============================================
 // APP.JS - Lista de Presentes de Casamento
 // Sincronização com Sheet.best (Nuvem)
+// CORRIGIDO: Exclusão, Adição e Compra funcionando
 // ============================================
 
-// SUA URL DO SHEET.BEST (JÁ CONFIGURADA)
+// SUA URL DO SHEET.BEST
 const API_URL = 'https://api.sheetbest.com/sheets/b9510bd2-4034-435c-947b-6cd5cb677199';
 
 let currentFilter = 'all';
@@ -27,7 +28,7 @@ async function carregarDaNuvem() {
         if (dados && dados.length > 0) {
             // Converter os dados para o formato padronizado
             presentes = dados.map(item => ({
-                id: item.id,
+                id: String(item.id),
                 nome: item.nome,
                 url: item.url,
                 preco: parseFloat(String(item.preco).replace('R$', '').replace(',', '.').trim()),
@@ -58,7 +59,47 @@ async function carregarDaNuvem() {
     }
 }
 
-// Salvar TODOS os dados na planilha (substitui tudo)
+// Função para atualizar um presente específico (PUT)
+async function atualizarPresenteNaNuvem(presenteAtualizado) {
+    try {
+        // Busca o presente pelo ID
+        const response = await fetch(`${API_URL}/id/${presenteAtualizado.id}`);
+        const dados = await response.json();
+        
+        if (dados && dados.length > 0) {
+            const linhaId = dados[0].id; // Pega o ID da linha
+            
+            // Prepara os dados atualizados
+            const dadosAtualizados = {
+                nome: presenteAtualizado.nome,
+                url: presenteAtualizado.url,
+                preco: `R$${presenteAtualizado.preco.toFixed(2).replace('.', ',')}`,
+                imagem: presenteAtualizado.imagem || '',
+                comprado: presenteAtualizado.comprado ? 'TRUE' : 'FALSE',
+                comprador: presenteAtualizado.comprador || '',
+                dataCompra: presenteAtualizado.dataCompra || ''
+            };
+            
+            // Atualiza a linha específica
+            const updateResponse = await fetch(`${API_URL}/id/${linhaId}`, {
+                method: 'PUT',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify(dadosAtualizados)
+            });
+            
+            if (updateResponse.ok) {
+                console.log("✅ Presente atualizado na nuvem!");
+                return true;
+            }
+        }
+        return false;
+    } catch(error) {
+        console.error("❌ Erro ao atualizar:", error);
+        return false;
+    }
+}
+
+// Salvar TODOS os dados na planilha (usado para adicionar/excluir)
 async function salvarNaNuvem() {
     try {
         console.log("💾 Salvando dados na nuvem...");
@@ -111,7 +152,7 @@ function carregarDadosLocais() {
         if (presentes.length === 0) {
             presentes = [
                 {
-                    id: Date.now() + 1,
+                    id: Date.now().toString(),
                     nome: "Jogo de Panelas Antiaderentes",
                     url: "https://www.magazineluiza.com.br/",
                     preco: 299.90,
@@ -149,6 +190,41 @@ window.salvarDadosGlobal = async function() {
         console.log("✅ Sincronização completa!");
     } else {
         console.warn("⚠️ Dados salvos apenas localmente. Verifique sua conexão.");
+    }
+};
+
+// Função para marcar como comprado (atualização individual)
+window.marcarComoComprado = async function(id) {
+    const presente = presentes.find(p => String(p.id) === String(id));
+    if (!presente || presente.comprado) return;
+    
+    const compradorNome = prompt('🎉 Parabéns pela compra!\n\nPor favor, digite seu nome para registrarmos sua gentileza:', 'Convidado');
+    
+    if (compradorNome && compradorNome.trim()) {
+        presente.comprado = true;
+        presente.comprador = compradorNome.trim();
+        presente.dataCompra = new Date().toISOString();
+        
+        // Tenta atualizar individualmente primeiro
+        const atualizado = await atualizarPresenteNaNuvem(presente);
+        
+        if (!atualizado) {
+            // Se falhar, faz o save completo
+            await salvarNaNuvem();
+        }
+        
+        salvarNoLocalStorage();
+        renderPresentes();
+        
+        // Atualizar admin se necessário
+        if (typeof window.atualizarAdmin === 'function') {
+            window.atualizarAdmin();
+        }
+        
+        alert(`✅ Obrigado ${compradorNome}!\n\n🎁 Presente: ${presente.nome}\n💰 Valor: R$ ${presente.preco.toFixed(2)}\n\nSua gentileza foi registrada com sucesso!`);
+        
+    } else if (compradorNome === '') {
+        alert('❌ Por favor, digite seu nome para confirmar a compra.');
     }
 };
 
@@ -200,11 +276,13 @@ function renderPresentes() {
     const container = document.getElementById('presentesList');
     if (!container) return;
     
-    let filteredPresentes = presentes;
+    // IMPORTANTE: Filtra corretamente sem duplicar
+    let filteredPresentes = [...presentes]; // Cria uma cópia
+    
     if (currentFilter === 'available') {
-        filteredPresentes = presentes.filter(p => !p.comprado);
+        filteredPresentes = filteredPresentes.filter(p => !p.comprado);
     } else if (currentFilter === 'purchased') {
-        filteredPresentes = presentes.filter(p => p.comprado);
+        filteredPresentes = filteredPresentes.filter(p => p.comprado);
     }
     
     if (filteredPresentes.length === 0) {
@@ -242,26 +320,6 @@ function renderPresentes() {
         </div>
     `).join('');
 }
-
-window.marcarComoComprado = async function(id) {
-    const presente = presentes.find(p => String(p.id) === String(id));
-    if (!presente || presente.comprado) return;
-    
-    const compradorNome = prompt('🎉 Parabéns pela compra!\n\nPor favor, digite seu nome para registrarmos sua gentileza:', 'Convidado');
-    
-    if (compradorNome && compradorNome.trim()) {
-        presente.comprado = true;
-        presente.comprador = compradorNome.trim();
-        presente.dataCompra = new Date().toISOString();
-        
-        await window.salvarDadosGlobal();
-        
-        alert(`✅ Obrigado ${compradorNome}!\n\n🎁 Presente: ${presente.nome}\n💰 Valor: R$ ${presente.preco.toFixed(2)}\n\nSua gentileza foi registrada com sucesso!`);
-        
-    } else if (compradorNome === '') {
-        alert('❌ Por favor, digite seu nome para confirmar a compra.');
-    }
-};
 
 function escapeHtml(text) {
     if (!text) return '';

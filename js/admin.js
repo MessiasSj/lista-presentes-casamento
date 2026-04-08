@@ -1,6 +1,11 @@
 // ============================================
 // ADMIN.JS - Área Administrativa
+// Com Sincronização na Nuvem (JSONBin.io)
 // ============================================
+
+// CONFIGURAÇÕES DO JSONBIN
+const BIN_ID = '69d5a3f2aaba882197d4e4b5';
+const API_KEY = '$2a$10$Q3UOEobQ/12x0P8MZMorteJ/zniJLV0pSy2.xtaaTjzKT5g87oML6';
 
 const ADMIN_PASSWORD = 'admin123';
 let isAdminLoggedIn = false;
@@ -81,6 +86,47 @@ function handleLogin() {
 }
 
 // ============================================
+// FUNÇÕES DE SINCRONIZAÇÃO
+// ============================================
+
+async function salvarNaNuvemAdmin() {
+    try {
+        const presentes = JSON.parse(localStorage.getItem('presentes_casamento') || '[]');
+        
+        const dadosParaSalvar = {
+            presentes: presentes,
+            ultimaAtualizacao: new Date().toISOString()
+        };
+        
+        const response = await fetch(`https://api.jsonbin.io/v3/b/${BIN_ID}`, {
+            method: 'PUT',
+            headers: {
+                'X-Master-Key': API_KEY,
+                'Content-Type': 'application/json'
+            },
+            body: JSON.stringify(dadosParaSalvar)
+        });
+        
+        if (response.ok) {
+            console.log("✅ Dados salvos na nuvem com sucesso!");
+        }
+        
+    } catch(error) {
+        console.error("❌ Erro ao salvar na nuvem:", error);
+    }
+}
+
+async function salvarDadosAdmin() {
+    localStorage.setItem('presentes_casamento', JSON.stringify(window.presentes || []));
+    await salvarNaNuvemAdmin();
+    
+    // Recarregar dados públicos
+    if (typeof window.loadPresentes === 'function') {
+        window.loadPresentes();
+    }
+}
+
+// ============================================
 // UPLOAD DE IMAGEM
 // ============================================
 function uploadImagem(file) {
@@ -107,7 +153,7 @@ function uploadImagem(file) {
 
 function renderAdminPresentesList() {
     const container = document.getElementById('adminPresentesList');
-    const presentes = JSON.parse(localStorage.getItem('presentes_casamento') || '[]');
+    let presentes = JSON.parse(localStorage.getItem('presentes_casamento') || '[]');
     
     if (presentes.length === 0) {
         container.innerHTML = `
@@ -161,7 +207,7 @@ function renderAdminPresentesList() {
 
 function renderPurchasedList() {
     const container = document.getElementById('purchasedList');
-    const presentes = JSON.parse(localStorage.getItem('presentes_casamento') || '[]');
+    let presentes = JSON.parse(localStorage.getItem('presentes_casamento') || '[]');
     const purchased = presentes.filter(p => p.comprado === true);
     
     if (purchased.length === 0) {
@@ -190,7 +236,7 @@ function renderPurchasedList() {
                                 <i class="fas fa-user"></i> Comprado por: <strong>${escapeHtml(presente.comprador || 'Anônimo')}</strong>
                             </p>
                             <p style="margin: 3px 0; font-size: 0.8rem; color: var(--text-light);">
-                                <i class="fas fa-calendar"></i> Data da compra: ${new Date(presente.dataCompra).toLocaleDateString('pt-BR')} às ${new Date(presente.dataCompra).toLocaleTimeString('pt-BR')}
+                                <i class="fas fa-calendar"></i> Data: ${new Date(presente.dataCompra).toLocaleDateString('pt-BR')} às ${new Date(presente.dataCompra).toLocaleTimeString('pt-BR')}
                             </p>
                         </div>
                     </div>
@@ -236,7 +282,7 @@ async function addPresente(event) {
         }
     }
     
-    const presentes = JSON.parse(localStorage.getItem('presentes_casamento') || '[]');
+    let presentes = JSON.parse(localStorage.getItem('presentes_casamento') || '[]');
     
     const newPresente = {
         id: Date.now(),
@@ -252,11 +298,18 @@ async function addPresente(event) {
     presentes.push(newPresente);
     localStorage.setItem('presentes_casamento', JSON.stringify(presentes));
     
+    // Salvar na nuvem
+    await salvarNaNuvemAdmin();
+    
+    // Limpar formulário
     addPresenteForm.reset();
     document.getElementById('produtoImagemFile').value = '';
     
+    // Atualizar listas
     renderAdminPresentesList();
+    renderPurchasedList();
     
+    // Recarregar dados públicos
     if (typeof window.loadPresentes === 'function') {
         window.loadPresentes();
     }
@@ -268,7 +321,7 @@ async function addPresente(event) {
 // EXCLUIR PRESENTE
 // ============================================
 
-window.deletePresente = function(id) {
+window.deletePresente = async function(id) {
     if (!isAdminLoggedIn) {
         alert('Você precisa estar logado para excluir presentes!');
         return;
@@ -279,9 +332,13 @@ window.deletePresente = function(id) {
         presentes = presentes.filter(p => p.id !== id);
         localStorage.setItem('presentes_casamento', JSON.stringify(presentes));
         
+        // Salvar na nuvem
+        await salvarNaNuvemAdmin();
+        
         renderAdminPresentesList();
         renderPurchasedList();
         
+        // Recarregar dados públicos
         if (typeof window.loadPresentes === 'function') {
             window.loadPresentes();
         }
@@ -331,6 +388,6 @@ adminPassword.addEventListener('keypress', (e) => {
     }
 });
 
-// Exportar funções para uso global
+// Exportar funções
 window.renderPurchasedList = renderPurchasedList;
 window.renderAdminPresentesList = renderAdminPresentesList;

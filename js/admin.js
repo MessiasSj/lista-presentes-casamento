@@ -3,10 +3,6 @@
 // Com Sincronização na Nuvem (JSONBin.io)
 // ============================================
 
-// CONFIGURAÇÕES DO JSONBIN
-const BIN_ID = '69d5a3f2aaba882197d4e4b5';
-const API_KEY = '$2a$10$Q3UOEobQ/12x0P8MZMorteJ/zniJLV0pSy2.xtaaTjzKT5g87oML6';
-
 const ADMIN_PASSWORD = 'admin123';
 let isAdminLoggedIn = false;
 
@@ -16,10 +12,6 @@ const adminModal = document.getElementById('adminModal');
 const closeModalBtn = document.querySelector('.close-btn');
 const loginBtn = document.getElementById('loginBtn');
 const adminPassword = document.getElementById('adminPassword');
-const loginTab = document.getElementById('loginTab');
-const manageTab = document.getElementById('manageTab');
-const purchasedTab = document.getElementById('purchasedTab');
-const tabBtns = document.querySelectorAll('.tab-btn');
 const addPresenteForm = document.getElementById('addPresenteForm');
 
 // ============================================
@@ -41,6 +33,11 @@ function closeModal() {
 }
 
 function switchTab(tabId) {
+    const tabBtns = document.querySelectorAll('.tab-btn');
+    const loginTab = document.getElementById('loginTab');
+    const manageTab = document.getElementById('manageTab');
+    const purchasedTab = document.getElementById('purchasedTab');
+    
     tabBtns.forEach(btn => {
         if (btn.dataset.tab === tabId) {
             btn.classList.add('active');
@@ -86,47 +83,6 @@ function handleLogin() {
 }
 
 // ============================================
-// FUNÇÕES DE SINCRONIZAÇÃO
-// ============================================
-
-async function salvarNaNuvemAdmin() {
-    try {
-        const presentes = JSON.parse(localStorage.getItem('presentes_casamento') || '[]');
-        
-        const dadosParaSalvar = {
-            presentes: presentes,
-            ultimaAtualizacao: new Date().toISOString()
-        };
-        
-        const response = await fetch(`https://api.jsonbin.io/v3/b/${BIN_ID}`, {
-            method: 'PUT',
-            headers: {
-                'X-Master-Key': API_KEY,
-                'Content-Type': 'application/json'
-            },
-            body: JSON.stringify(dadosParaSalvar)
-        });
-        
-        if (response.ok) {
-            console.log("✅ Dados salvos na nuvem com sucesso!");
-        }
-        
-    } catch(error) {
-        console.error("❌ Erro ao salvar na nuvem:", error);
-    }
-}
-
-async function salvarDadosAdmin() {
-    localStorage.setItem('presentes_casamento', JSON.stringify(window.presentes || []));
-    await salvarNaNuvemAdmin();
-    
-    // Recarregar dados públicos
-    if (typeof window.loadPresentes === 'function') {
-        window.loadPresentes();
-    }
-}
-
-// ============================================
 // UPLOAD DE IMAGEM
 // ============================================
 function uploadImagem(file) {
@@ -153,7 +109,7 @@ function uploadImagem(file) {
 
 function renderAdminPresentesList() {
     const container = document.getElementById('adminPresentesList');
-    let presentes = JSON.parse(localStorage.getItem('presentes_casamento') || '[]');
+    let presentes = window.getPresentes ? window.getPresentes() : [];
     
     if (presentes.length === 0) {
         container.innerHTML = `
@@ -169,7 +125,7 @@ function renderAdminPresentesList() {
     container.innerHTML = `
         <div style="display: grid; grid-template-columns: repeat(auto-fill, minmax(280px, 1fr)); gap: 20px; margin-top: 20px;">
             ${presentes.map(presente => `
-                <div style="background: white; border-radius: 15px; overflow: hidden; box-shadow: 0 2px 8px rgba(0,0,0,0.1); transition: transform 0.2s;">
+                <div style="background: white; border-radius: 15px; overflow: hidden; box-shadow: 0 2px 8px rgba(0,0,0,0.1);">
                     <img src="${presente.imagem || 'https://via.placeholder.com/280x160/D67A5A/FFFFFF?text=Sem+Imagem'}" 
                          style="width: 100%; height: 160px; object-fit: cover;"
                          onerror="this.src='https://via.placeholder.com/280x160/D67A5A/FFFFFF?text=Imagem+não+disponível'">
@@ -187,9 +143,6 @@ function renderAdminPresentesList() {
                                 <i class="fas fa-calendar"></i> <strong>Data:</strong> ${new Date(presente.dataCompra).toLocaleDateString('pt-BR')}
                             </p>
                         ` : ''}
-                        <p style="margin: 5px 0; font-size: 0.7rem; color: var(--text-light); word-break: break-all;">
-                            🔗 ${presente.url.substring(0, 40)}...
-                        </p>
                         <button onclick="deletePresente(${presente.id})" 
                                 style="margin-top: 10px; width: 100%; padding: 8px; background: linear-gradient(135deg, #D67A5A, #B55B3E); color: white; border: none; border-radius: 8px; cursor: pointer;">
                             <i class="fas fa-trash"></i> Excluir Presente
@@ -201,13 +154,9 @@ function renderAdminPresentesList() {
     `;
 }
 
-// ============================================
-// LISTA DE PRESENTES COMPRADOS
-// ============================================
-
 function renderPurchasedList() {
     const container = document.getElementById('purchasedList');
-    let presentes = JSON.parse(localStorage.getItem('presentes_casamento') || '[]');
+    let presentes = window.getPresentes ? window.getPresentes() : [];
     const purchased = presentes.filter(p => p.comprado === true);
     
     if (purchased.length === 0) {
@@ -249,6 +198,14 @@ function renderPurchasedList() {
     `;
 }
 
+// Função para atualizar o admin (chamada pelo app.js)
+window.atualizarAdmin = function() {
+    if (isAdminLoggedIn) {
+        renderAdminPresentesList();
+        renderPurchasedList();
+    }
+};
+
 // ============================================
 // ADICIONAR PRESENTE
 // ============================================
@@ -282,7 +239,7 @@ async function addPresente(event) {
         }
     }
     
-    let presentes = JSON.parse(localStorage.getItem('presentes_casamento') || '[]');
+    let presentes = window.getPresentes ? window.getPresentes() : [];
     
     const newPresente = {
         id: Date.now(),
@@ -296,23 +253,24 @@ async function addPresente(event) {
     };
     
     presentes.push(newPresente);
-    localStorage.setItem('presentes_casamento', JSON.stringify(presentes));
+    
+    if (window.setPresentes) {
+        window.setPresentes(presentes);
+    }
     
     // Salvar na nuvem
-    await salvarNaNuvemAdmin();
+    if (typeof window.salvarDadosGlobal === 'function') {
+        await window.salvarDadosGlobal();
+    }
     
     // Limpar formulário
     addPresenteForm.reset();
     document.getElementById('produtoImagemFile').value = '';
+    document.getElementById('produtoImagem').value = '';
     
     // Atualizar listas
     renderAdminPresentesList();
     renderPurchasedList();
-    
-    // Recarregar dados públicos
-    if (typeof window.loadPresentes === 'function') {
-        window.loadPresentes();
-    }
     
     alert('✅ Presente adicionado com sucesso!');
 }
@@ -328,20 +286,20 @@ window.deletePresente = async function(id) {
     }
     
     if (confirm('⚠️ Tem certeza que deseja excluir este presente permanentemente?')) {
-        let presentes = JSON.parse(localStorage.getItem('presentes_casamento') || '[]');
+        let presentes = window.getPresentes ? window.getPresentes() : [];
         presentes = presentes.filter(p => p.id !== id);
-        localStorage.setItem('presentes_casamento', JSON.stringify(presentes));
+        
+        if (window.setPresentes) {
+            window.setPresentes(presentes);
+        }
         
         // Salvar na nuvem
-        await salvarNaNuvemAdmin();
+        if (typeof window.salvarDadosGlobal === 'function') {
+            await window.salvarDadosGlobal();
+        }
         
         renderAdminPresentesList();
         renderPurchasedList();
-        
-        // Recarregar dados públicos
-        if (typeof window.loadPresentes === 'function') {
-            window.loadPresentes();
-        }
         
         alert('✅ Presente excluído com sucesso!');
     }
@@ -361,10 +319,10 @@ function escapeHtml(text) {
 // ============================================
 // EVENT LISTENERS
 // ============================================
-adminToggleBtn.addEventListener('click', openModal);
-closeModalBtn.addEventListener('click', closeModal);
-loginBtn.addEventListener('click', handleLogin);
-addPresenteForm.addEventListener('submit', addPresente);
+if (adminToggleBtn) adminToggleBtn.addEventListener('click', openModal);
+if (closeModalBtn) closeModalBtn.addEventListener('click', closeModal);
+if (loginBtn) loginBtn.addEventListener('click', handleLogin);
+if (addPresenteForm) addPresenteForm.addEventListener('submit', addPresente);
 
 window.addEventListener('click', (event) => {
     if (event.target === adminModal) {
@@ -372,6 +330,7 @@ window.addEventListener('click', (event) => {
     }
 });
 
+const tabBtns = document.querySelectorAll('.tab-btn');
 tabBtns.forEach(btn => {
     btn.addEventListener('click', () => {
         if (btn.dataset.tab !== 'login' && !isAdminLoggedIn) {
@@ -382,12 +341,10 @@ tabBtns.forEach(btn => {
     });
 });
 
-adminPassword.addEventListener('keypress', (e) => {
-    if (e.key === 'Enter') {
-        handleLogin();
-    }
-});
-
-// Exportar funções
-window.renderPurchasedList = renderPurchasedList;
-window.renderAdminPresentesList = renderAdminPresentesList;
+if (adminPassword) {
+    adminPassword.addEventListener('keypress', (e) => {
+        if (e.key === 'Enter') {
+            handleLogin();
+        }
+    });
+}

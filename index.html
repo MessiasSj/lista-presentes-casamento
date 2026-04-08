@@ -2,157 +2,359 @@
 <html lang="pt-BR">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Lista de Presentes - Aysnara & Evandro</title>
-    <!-- Fontes Elegantes -->
     <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@400;500;600;700&family=Poppins:wght@300;400;500;600;700&display=swap" rel="stylesheet">
-    <link rel="stylesheet" href="css/style.css">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
-</head>
-    <!-- Botão Voltar ao Topo (útil no mobile) -->
-<button onclick="window.scrollTo({top: 0, behavior: 'smooth'})" id="backToTop" style="position: fixed; bottom: 100px; right: 20px; width: 45px; height: 45px; border-radius: 50%; background: linear-gradient(135deg, #D67A5A, #B55B3E); color: white; border: none; cursor: pointer; display: none; box-shadow: 0 2px 10px rgba(0,0,0,0.2); z-index: 999;">
-    <i class="fas fa-arrow-up"></i>
-</button>
-
-<script>
-    // Mostrar botão quando rolar a página
-    window.addEventListener('scroll', function() {
-        const btn = document.getElementById('backToTop');
-        if (window.scrollY > 300) {
-            btn.style.display = 'block';
-        } else {
-            btn.style.display = 'none';
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        :root {
+            --terra-cota-primary: #D67A5A;
+            --terra-cota-dark: #B55B3E;
+            --terra-cota-bg: #FEF7F4;
+            --text-dark: #3D2B1F;
+            --success: #7A9E7E;
+            --shadow: 0 5px 20px rgba(0,0,0,0.1);
         }
-    });
-</script>
+        body { font-family: 'Poppins', sans-serif; background: var(--terra-cota-bg); color: var(--text-dark); }
+        .hero { background: linear-gradient(135deg, var(--terra-cota-primary), var(--terra-cota-dark)); color: white; text-align: center; padding: 60px 20px; }
+        .hero h1 { font-size: 3rem; font-family: 'Playfair Display', serif; }
+        .hero h1 i { margin: 0 15px; color: #D4AF37; }
+        .date { font-size: 1.2rem; margin: 15px 0; }
+        .countdown { display: flex; justify-content: center; gap: 20px; margin: 30px 0; }
+        .countdown-item { background: rgba(255,255,255,0.15); padding: 10px 20px; border-radius: 12px; text-align: center; }
+        .countdown-item span { font-size: 1.8rem; font-weight: bold; display: block; }
+        .container { max-width: 1200px; margin: 0 auto; padding: 40px 20px; }
+        .filters { display: flex; justify-content: center; gap: 15px; margin-bottom: 40px; flex-wrap: wrap; }
+        .filter-btn { padding: 10px 25px; background: white; border: 2px solid #E8C9BC; border-radius: 30px; cursor: pointer; transition: 0.3s; }
+        .filter-btn.active, .filter-btn:hover { background: var(--terra-cota-primary); color: white; border-color: transparent; }
+        .presentes-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(300px, 1fr)); gap: 30px; }
+        .presente-card { background: white; border-radius: 20px; overflow: hidden; box-shadow: var(--shadow); transition: transform 0.3s; }
+        .presente-card:hover { transform: translateY(-5px); }
+        .presente-imagem { width: 100%; height: 200px; object-fit: cover; }
+        .presente-info { padding: 20px; }
+        .presente-nome { font-size: 1.2rem; margin-bottom: 10px; }
+        .presente-preco { font-size: 1.3rem; font-weight: bold; color: var(--terra-cota-primary); margin-bottom: 10px; }
+        .presente-status { display: inline-block; padding: 5px 12px; border-radius: 20px; font-size: 0.8rem; margin-bottom: 15px; }
+        .status-disponivel { background: var(--success); color: white; }
+        .status-comprado { background: #ccc; color: #666; }
+        .presente-link { display: block; background: var(--terra-cota-primary); color: white; text-align: center; padding: 10px; border-radius: 10px; text-decoration: none; margin-top: 10px; }
+        .btn-comprar { background: var(--success); margin-top: 5px; border: none; width: 100%; cursor: pointer; font-size: 1rem; }
+        footer { background: var(--terra-cota-dark); color: white; text-align: center; padding: 30px; margin-top: 40px; }
+        .admin-toggle-btn { position: fixed; bottom: 20px; right: 20px; width: 50px; height: 50px; border-radius: 50%; background: var(--terra-cota-primary); color: white; border: none; cursor: pointer; font-size: 1.5rem; box-shadow: var(--shadow); z-index: 100; }
+        .modal { display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.5); z-index: 1000; }
+        .modal-content { background: white; max-width: 500px; margin: 50px auto; border-radius: 20px; overflow: hidden; }
+        .modal-header { background: var(--terra-cota-primary); color: white; padding: 15px 20px; display: flex; justify-content: space-between; }
+        .modal-body { padding: 20px; }
+        .form-group { margin-bottom: 15px; }
+        .form-group label { display: block; margin-bottom: 5px; font-weight: 600; }
+        .form-group input { width: 100%; padding: 10px; border: 2px solid #E8C9BC; border-radius: 10px; }
+        .btn-primary { background: var(--terra-cota-primary); color: white; padding: 12px; border: none; border-radius: 10px; width: 100%; cursor: pointer; font-weight: 600; }
+        .close-btn { cursor: pointer; font-size: 24px; }
+        .admin-tabs { display: flex; gap: 10px; margin-bottom: 20px; border-bottom: 2px solid #E8C9BC; }
+        .tab-btn { padding: 10px 20px; background: none; border: none; cursor: pointer; font-size: 1rem; }
+        .tab-btn.active { color: var(--terra-cota-primary); border-bottom: 2px solid var(--terra-cota-primary); }
+        .tab-content { display: none; }
+        .tab-content.active { display: block; }
+        .admin-card { background: #f5f5f5; border-radius: 10px; padding: 10px; margin-bottom: 10px; display: flex; justify-content: space-between; align-items: center; }
+        .admin-card small { display: block; color: #666; }
+        .loading { text-align: center; padding: 40px; color: #999; }
+        @media (max-width: 768px) { .presentes-grid { grid-template-columns: 1fr; } .hero h1 { font-size: 2rem; } .countdown { gap: 10px; } .countdown-item { padding: 5px 10px; } .countdown-item span { font-size: 1.2rem; } }
+    </style>
+</head>
 <body>
-    <!-- Cabeçalho Principal -->
-    <header class="hero">
-        <div class="hero-content">
-            <h1>Aysnara <i class="fas fa-heart"></i> Evandro</h1>
-            <p class="date">06 de Maio, 2026</p>
-            
-            <!-- CONTADOR REGRESSIVO -->
-            <div class="countdown" id="countdown">
-                <div class="countdown-item">
-                    <span id="days">00</span>
-                    <small>Dias</small>
-                </div>
-                <div class="countdown-item">
-                    <span id="hours">00</span>
-                    <small>Horas</small>
-                </div>
-                <div class="countdown-item">
-                    <span id="minutes">00</span>
-                    <small>Minutos</small>
-                </div>
-                <div class="countdown-item">
-                    <span id="seconds">00</span>
-                    <small>Segundos</small>
-                </div>
-            </div>
-            
-            <h2>Lista de Presentes</h2>
-            <p class="subtitle">Escolha um presente e nos ajude a realizar nossos sonhos</p>
+
+<header class="hero">
+    <div class="hero-content">
+        <h1>Aysnara <i class="fas fa-heart"></i> Evandro</h1>
+        <p class="date">06 de Maio, 2026</p>
+        <div class="countdown" id="countdown">
+            <div class="countdown-item"><span id="days">00</span><small>Dias</small></div>
+            <div class="countdown-item"><span id="hours">00</span><small>Horas</small></div>
+            <div class="countdown-item"><span id="minutes">00</span><small>Minutos</small></div>
+            <div class="countdown-item"><span id="seconds">00</span><small>Segundos</small></div>
         </div>
-    </header>
+        <h2>Lista de Presentes</h2>
+        <p class="subtitle">Escolha um presente e nos ajude a realizar nossos sonhos</p>
+    </div>
+</header>
 
-    <!-- Botão Admin (canto inferior direito) -->
-    <button id="adminToggleBtn" class="admin-toggle-btn" title="Modo Admin">
-        <i class="fas fa-cog"></i>
-    </button>
+<button class="admin-toggle-btn" id="adminBtn"><i class="fas fa-cog"></i></button>
 
-    <!-- Modal Admin -->
-    <div id="adminModal" class="modal">
-        <div class="modal-content">
-            <div class="modal-header">
-                <h2><i class="fas fa-lock"></i> Área Administrativa</h2>
-                <span class="close-btn">&times;</span>
+<div id="adminModal" class="modal">
+    <div class="modal-content">
+        <div class="modal-header"><h2><i class="fas fa-lock"></i> Área Administrativa</h2><span class="close-btn">&times;</span></div>
+        <div class="modal-body">
+            <div class="admin-tabs">
+                <button class="tab-btn active" data-tab="login">Login</button>
+                <button class="tab-btn" data-tab="manage">Gerenciar</button>
+                <button class="tab-btn" data-tab="purchased">Comprados</button>
             </div>
-            <div class="modal-body">
-                <div class="admin-tabs">
-                    <button class="tab-btn active" data-tab="login">Login</button>
-                    <button class="tab-btn" data-tab="manage">Gerenciar Presentes</button>
-                    <button class="tab-btn" data-tab="purchased">Compras Realizadas</button>
-                </div>
-                
-                <!-- Aba de Login -->
-                <div id="loginTab" class="tab-content active">
-                    <div class="form-group">
-                        <label for="adminPassword">Senha do Administrador:</label>
-                        <input type="password" id="adminPassword" placeholder="Digite a senha">
-                        <button id="loginBtn" class="btn-primary">Entrar</button>
-                        <p class="helper-text">Senha padrão: admin123</p>
-                    </div>
-                </div>
-
-                <!-- Aba de Gerenciamento -->
-                <div id="manageTab" class="tab-content">
-                    <h3>✨ Adicionar Novo Presente</h3>
-                    <form id="addPresenteForm">
-                        <div class="form-group">
-                            <label for="produtoNome">📦 Nome do Produto:</label>
-                            <input type="text" id="produtoNome" required placeholder="Ex: Jogo de Panelas Tramontina">
-                        </div>
-                        <div class="form-group">
-                            <label for="produtoUrl">🔗 URL da Loja:</label>
-                            <input type="url" id="produtoUrl" placeholder="https://www.exemplo.com/produto" required>
-                        </div>
-                        <div class="form-group">
-                            <label for="produtoPreco">💰 Preço (R$):</label>
-                            <input type="number" id="produtoPreco" step="0.01" required placeholder="Ex: 299.90">
-                        </div>
-                        <div class="form-group">
-                            <label for="produtoImagem">🖼️ URL da Imagem (opcional):</label>
-                            <input type="url" id="produtoImagem" placeholder="https://www.exemplo.com/imagem.jpg">
-                        </div>
-                        <div class="form-group">
-                            <label for="produtoImagemFile">📁 OU Enviar imagem do computador:</label>
-                            <input type="file" id="produtoImagemFile" accept="image/*">
-                            <small style="color: var(--text-light);">Formatos: JPG, PNG, GIF</small>
-                        </div>
-                        <button type="submit" class="btn-primary">
-                            <i class="fas fa-plus-circle"></i> Adicionar Presente
-                        </button>
-                    </form>
-
-                    <hr>
-
-                    <h3>🎁 Todos os Presentes Cadastrados</h3>
-                    <div id="adminPresentesList"></div>
-                </div>
-
-                <!-- Aba de Compras Realizadas -->
-                <div id="purchasedTab" class="tab-content">
-                    <h3>📋 Presentes Já Comprados</h3>
-                    <div id="purchasedList"></div>
-                </div>
+            <div id="loginTab" class="tab-content active">
+                <div class="form-group"><label>Senha:</label><input type="password" id="adminPassword" placeholder="Digite a senha"><button id="loginBtn" class="btn-primary" style="margin-top:10px">Entrar</button><p style="margin-top:10px; font-size:12px; text-align:center">Senha: admin123</p></div>
+            </div>
+            <div id="manageTab" class="tab-content">
+                <h3>✨ Adicionar Presente</h3>
+                <form id="addForm">
+                    <div class="form-group"><label>Nome do Produto:</label><input type="text" id="prodNome" required placeholder="Ex: Jogo de Panelas"></div>
+                    <div class="form-group"><label>URL da Loja:</label><input type="url" id="prodUrl" required placeholder="https://..."></div>
+                    <div class="form-group"><label>Preço (R$):</label><input type="number" id="prodPreco" step="0.01" required placeholder="299.90"></div>
+                    <div class="form-group"><label>URL da Imagem:</label><input type="url" id="prodImagem" placeholder="https://... (opcional)"></div>
+                    <button type="submit" class="btn-primary"><i class="fas fa-plus"></i> Adicionar Presente</button>
+                </form>
+                <hr>
+                <h3>📦 Presentes Cadastrados</h3>
+                <div id="adminList"></div>
+            </div>
+            <div id="purchasedTab" class="tab-content">
+                <h3>🎁 Presentes Comprados</h3>
+                <div id="purchasedList"></div>
             </div>
         </div>
     </div>
+</div>
 
-    <!-- Lista de Presentes Principal -->
-    <main class="container">
-        <div class="filters">
-            <button class="filter-btn active" data-filter="all">Todos</button>
-            <button class="filter-btn" data-filter="available">Disponíveis</button>
-            <button class="filter-btn" data-filter="purchased">Comprados</button>
+<main class="container">
+    <div class="filters">
+        <button class="filter-btn active" data-filter="all">Todos</button>
+        <button class="filter-btn" data-filter="available">Disponíveis</button>
+        <button class="filter-btn" data-filter="purchased">Comprados</button>
+    </div>
+    <div id="presentesList" class="presentes-grid"><div class="loading"><i class="fas fa-spinner fa-pulse"></i> Carregando presentes...</div></div>
+</main>
+
+<footer><p>© 2026 Aysnara & Evandro - Lista de Presentes de Casamento</p><p>Presentes sincronizados em tempo real</p></footer>
+
+<script>
+// ============================================
+// ⚠️ COLE A SUA URL DO SHEET.BEST AQUI ⚠️
+// ============================================
+const API_URL = 'https://api.sheetbest.com/sheets/b9510bd2-4034-435c-947b-6cd5cb677199';
+
+let isAdmin = false;
+let currentFilter = 'all';
+let presentes = [];
+
+// Contador regressivo
+function updateCountdown() {
+    const target = new Date(2026, 4, 6);
+    const diff = target - new Date();
+    if (diff <= 0) return;
+    document.getElementById('days').textContent = String(Math.floor(diff / 86400000)).padStart(2, '0');
+    document.getElementById('hours').textContent = String(Math.floor((diff % 86400000) / 3600000)).padStart(2, '0');
+    document.getElementById('minutes').textContent = String(Math.floor((diff % 3600000) / 60000)).padStart(2, '0');
+    document.getElementById('seconds').textContent = String(Math.floor((diff % 60000) / 1000)).padStart(2, '0');
+}
+setInterval(updateCountdown, 1000);
+updateCountdown();
+
+// Carregar dados da planilha
+async function carregarDados() {
+    try {
+        const response = await fetch(API_URL);
+        const dados = await response.json();
+        presentes = dados;
+        console.log('✅ Dados carregados:', presentes.length, 'presentes');
+        renderizarPresentes();
+        if (isAdmin) {
+            renderizarAdminList();
+            renderizarCompradosList();
+        }
+    } catch(error) {
+        console.error('Erro:', error);
+        document.getElementById('presentesList').innerHTML = '<div class="loading">❌ Erro ao carregar. Recarregue a página.</div>';
+    }
+}
+
+// Salvar dados na planilha (substitui tudo)
+async function salvarDados() {
+    try {
+        await fetch(API_URL, { method: 'DELETE' });
+        await fetch(API_URL, {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify(presentes)
+        });
+        console.log('✅ Dados salvos com sucesso!');
+        await carregarDados();
+    } catch(error) {
+        console.error('Erro ao salvar:', error);
+        alert('❌ Erro ao salvar. Tente novamente.');
+    }
+}
+
+// Renderizar presentes na página principal
+function renderizarPresentes() {
+    const container = document.getElementById('presentesList');
+    let filtrados = presentes;
+    
+    if (currentFilter === 'available') {
+        filtrados = presentes.filter(p => p.comprado !== 'TRUE' && p.comprado !== true);
+    } else if (currentFilter === 'purchased') {
+        filtrados = presentes.filter(p => p.comprado === 'TRUE' || p.comprado === true);
+    }
+    
+    if (!filtrados || filtrados.length === 0) {
+        container.innerHTML = '<div class="loading">Nenhum presente encontrado</div>';
+        return;
+    }
+    
+    container.innerHTML = filtrados.map(p => `
+        <div class="presente-card">
+            <img src="${p.imagem || 'https://via.placeholder.com/300x200/D67A5A/FFFFFF?text=Presente'}" class="presente-imagem" onerror="this.src='https://via.placeholder.com/300x200/D67A5A/FFFFFF?text=Imagem'">
+            <div class="presente-info">
+                <h3 class="presente-nome">${escapeHtml(p.nome)}</h3>
+                <p class="presente-preco">R$ ${Number(p.preco).toFixed(2)}</p>
+                <span class="presente-status ${(p.comprado === 'TRUE' || p.comprado === true) ? 'status-comprado' : 'status-disponivel'}">
+                    ${(p.comprado === 'TRUE' || p.comprado === true) ? '✓ Comprado' : '✓ Disponível'}
+                </span>
+                ${(p.comprado === 'TRUE' || p.comprado === true) ? `<p style="font-size:0.8rem; margin-top:10px"><i class="fas fa-user"></i> ${escapeHtml(p.comprador)}<br><i class="fas fa-calendar"></i> ${p.dataCompra || ''}</p>` : ''}
+                <a href="${p.url}" target="_blank" class="presente-link"><i class="fas fa-store"></i> Ver na Loja</a>
+                ${(p.comprado !== 'TRUE' && p.comprado !== true) ? `<button onclick="marcarComprado('${p.id}')" class="presente-link btn-comprar"><i class="fas fa-gift"></i> Já comprei este presente</button>` : ''}
+            </div>
         </div>
-        
-        <div id="presentesList" class="presentes-grid">
-            <div class="loading">Carregando presentes...</div>
+    `).join('');
+}
+
+// Marcar como comprado
+window.marcarComprado = async function(id) {
+    const presente = presentes.find(p => p.id == id);
+    if (!presente) return;
+    
+    const nome = prompt('🎉 Parabéns pela compra!\n\nDigite seu nome para registrar:', 'Convidado');
+    if (!nome) return;
+    
+    presente.comprado = 'TRUE';
+    presente.comprador = nome;
+    presente.dataCompra = new Date().toLocaleDateString('pt-BR');
+    
+    await salvarDados();
+    alert(`✅ Obrigado ${nome}! Seu presente foi registrado com sucesso!`);
+};
+
+// Renderizar lista no admin
+function renderizarAdminList() {
+    const container = document.getElementById('adminList');
+    if (!presentes.length) { container.innerHTML = '<p style="text-align:center">Nenhum presente cadastrado</p>'; return; }
+    
+    container.innerHTML = presentes.map(p => `
+        <div class="admin-card">
+            <div>
+                <strong>${escapeHtml(p.nome)}</strong><br>
+                <small>R$ ${Number(p.preco).toFixed(2)}</small><br>
+                <small>${(p.comprado === 'TRUE' || p.comprado === true) ? '✅ COMPRADO por ' + escapeHtml(p.comprador) : '📦 DISPONÍVEL'}</small>
+            </div>
+            <button onclick="excluirPresente('${p.id}')" style="background:#D67A5A; color:white; border:none; padding:8px 15px; border-radius:8px; cursor:pointer"><i class="fas fa-trash"></i></button>
         </div>
-    </main>
+    `).join('');
+}
 
-    <!-- Rodapé -->
-    <footer>
-        <p>© 2026 Aysnara & Evandro - Lista de Presentes de Casamento</p>
-        <p>Presentes adicionados via links das lojas oficiais</p>
-        <p>Site criado por Evandro Messias</p>
-    </footer>
+function renderizarCompradosList() {
+    const container = document.getElementById('purchasedList');
+    const comprados = presentes.filter(p => p.comprado === 'TRUE' || p.comprado === true);
+    
+    if (!comprados.length) { container.innerHTML = '<p style="text-align:center">Nenhum presente foi comprado ainda</p>'; return; }
+    
+    container.innerHTML = comprados.map(p => `
+        <div class="admin-card">
+            <div>
+                <strong>${escapeHtml(p.nome)}</strong><br>
+                <small>R$ ${Number(p.preco).toFixed(2)}</small><br>
+                <small><i class="fas fa-user"></i> ${escapeHtml(p.comprador)}</small><br>
+                <small><i class="fas fa-calendar"></i> ${p.dataCompra || ''}</small>
+            </div>
+        </div>
+    `).join('');
+}
 
-    <script src="js/app.js"></script>
-    <script src="js/admin.js"></script>
+// Excluir presente
+window.excluirPresente = async function(id) {
+    if (!confirm('⚠️ Tem certeza que deseja excluir este presente permanentemente?')) return;
+    presentes = presentes.filter(p => p.id != id);
+    await salvarDados();
+};
+
+// Adicionar presente
+document.getElementById('addForm')?.addEventListener('submit', async (e) => {
+    e.preventDefault();
+    
+    const novoPresente = {
+        id: Date.now().toString(),
+        nome: document.getElementById('prodNome').value,
+        url: document.getElementById('prodUrl').value,
+        preco: parseFloat(document.getElementById('prodPreco').value),
+        imagem: document.getElementById('prodImagem').value || '',
+        comprado: 'FALSE',
+        comprador: '',
+        dataCompra: ''
+    };
+    
+    presentes.push(novoPresente);
+    await salvarDados();
+    e.target.reset();
+    alert('✅ Presente adicionado com sucesso!');
+});
+
+// Filtros
+document.querySelectorAll('.filter-btn').forEach(btn => {
+    btn.addEventListener('click', () => {
+        document.querySelectorAll('.filter-btn').forEach(b => b.classList.remove('active'));
+        btn.classList.add('active');
+        currentFilter = btn.dataset.filter;
+        renderizarPresentes();
+    });
+});
+
+// Modal Admin
+const modal = document.getElementById('adminModal');
+document.getElementById('adminBtn').onclick = () => modal.style.display = 'block';
+document.querySelector('.close-btn').onclick = () => modal.style.display = 'none';
+window.onclick = (e) => { if (e.target === modal) modal.style.display = 'none'; };
+
+// Login Admin
+document.getElementById('loginBtn').onclick = () => {
+    const senha = document.getElementById('adminPassword').value;
+    if (senha === 'admin123') {
+        isAdmin = true;
+        document.querySelectorAll('.tab-btn').forEach(btn => {
+            if (btn.dataset.tab !== 'login') btn.style.display = 'inline-block';
+        });
+        document.querySelector('[data-tab="manage"]').click();
+        alert('✅ Login realizado com sucesso!');
+        renderizarAdminList();
+    } else {
+        alert('❌ Senha incorreta!');
+    }
+};
+
+// Tabs do Admin
+document.querySelectorAll('.tab-btn').forEach(btn => {
+    btn.onclick = () => {
+        if (btn.dataset.tab !== 'login' && !isAdmin) {
+            alert('Faça login primeiro');
+            return;
+        }
+        document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active'));
+        btn.classList.add('active');
+        document.querySelectorAll('.tab-content').forEach(tab => tab.classList.remove('active'));
+        document.getElementById(`${btn.dataset.tab}Tab`).classList.add('active');
+        if (btn.dataset.tab === 'manage' && isAdmin) renderizarAdminList();
+        if (btn.dataset.tab === 'purchased' && isAdmin) renderizarCompradosList();
+    };
+});
+
+function escapeHtml(text) { 
+    if (!text) return ''; 
+    return String(text).replace(/[&<>]/g, function(m) { 
+        if (m === '&') return '&amp;'; 
+        if (m === '<') return '&lt;'; 
+        if (m === '>') return '&gt;'; 
+        return m; 
+    }); 
+}
+
+// Iniciar
+carregarDados();
+</script>
 </body>
-    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=yes">
 </html>

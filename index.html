@@ -9,6 +9,22 @@
     <link rel="stylesheet" href="css/style.css">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
 </head>
+    <!-- Botão Voltar ao Topo (útil no mobile) -->
+<button onclick="window.scrollTo({top: 0, behavior: 'smooth'})" id="backToTop" style="position: fixed; bottom: 100px; right: 20px; width: 45px; height: 45px; border-radius: 50%; background: linear-gradient(135deg, #D67A5A, #B55B3E); color: white; border: none; cursor: pointer; display: none; box-shadow: 0 2px 10px rgba(0,0,0,0.2); z-index: 999;">
+    <i class="fas fa-arrow-up"></i>
+</button>
+
+<script>
+    // Mostrar botão quando rolar a página
+    window.addEventListener('scroll', function() {
+        const btn = document.getElementById('backToTop');
+        if (window.scrollY > 300) {
+            btn.style.display = 'block';
+        } else {
+            btn.style.display = 'none';
+        }
+    });
+</script>
 <body>
     <!-- Cabeçalho Principal -->
     <header class="hero">
@@ -138,4 +154,5 @@
     <script src="js/app.js"></script>
     <script src="js/admin.js"></script>
 </body>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=yes">
 </html>

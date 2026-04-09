@@ -469,7 +469,7 @@ hr {
     flex-direction: column;
     height: 100%;
     /* Card muito mais alto para mostrar todos os botões */
-    aspect-ratio: 1 / 2.20;
+    aspect-ratio: 1 / 1.80;
 }
 
 .presente-card::before {
@@ -629,7 +629,7 @@ hr {
 .carousel-slide {
     flex: 0 0 100%;
     display: grid;
-    gap: 30px;
+    gap: 60px;
     padding: 5px;
 }
 

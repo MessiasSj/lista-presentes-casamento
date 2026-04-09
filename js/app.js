@@ -1,16 +1,15 @@
 // ============================================
 // APP.JS - Lista de Presentes de Casamento
 // Sincronização com Sheet.best (Nuvem)
-// Com Carrossel, Filtros e Categorias
+// Com Carrossel, Filtros e Categorias Fixas
 // ============================================
 
 // SUA URL DO SHEET.BEST
 const API_URL = 'https://api.sheetbest.com/sheets/b9510bd2-4034-435c-947b-6cd5cb677199';
 
-let currentFilter = 'all';
-let currentCategory = 'all';
+let currentFilter = 'all';      // all, available, purchased
+let currentCategory = 'all';     // all, Cozinha, Cama, Banho, Pix, Mesa
 let presentes = [];
-let categoriasUnicas = [];
 
 // Variáveis do carrossel
 let currentSlide = 0;
@@ -50,11 +49,7 @@ async function carregarDaNuvem() {
             presentes = [];
         }
         
-        // Extrair categorias únicas
-        extrairCategorias();
-        
         salvarNoLocalStorage();
-        atualizarSelectCategorias();
         renderCarrossel();
         
         if (typeof window.atualizarAdmin === 'function') {
@@ -65,43 +60,6 @@ async function carregarDaNuvem() {
         console.error("❌ Erro ao carregar da nuvem:", error);
         carregarDadosLocais();
         renderCarrossel();
-    }
-}
-
-// Extrair categorias únicas dos produtos
-function extrairCategorias() {
-    const categoriasSet = new Set();
-    presentes.forEach(presente => {
-        if (presente.categoria && presente.categoria.trim()) {
-            categoriasSet.add(presente.categoria.trim());
-        }
-    });
-    categoriasUnicas = Array.from(categoriasSet).sort();
-    console.log("📂 Categorias encontradas:", categoriasUnicas);
-}
-
-// Atualizar o select de categorias no HTML
-function atualizarSelectCategorias() {
-    const select = document.getElementById('categoryFilter');
-    if (!select) return;
-    
-    const currentValue = select.value;
-    
-    select.innerHTML = '<option value="all">📂 Todas Categorias</option>';
-    
-    categoriasUnicas.forEach(categoria => {
-        const option = document.createElement('option');
-        option.value = categoria;
-        option.textContent = `📁 ${categoria}`;
-        select.appendChild(option);
-    });
-    
-    // Restaurar valor anterior se ainda existir
-    if (currentValue !== 'all' && categoriasUnicas.includes(currentValue)) {
-        select.value = currentValue;
-    } else {
-        select.value = 'all';
-        currentCategory = 'all';
     }
 }
 
@@ -184,8 +142,6 @@ function carregarDadosLocais() {
     if (stored) {
         presentes = JSON.parse(stored);
         console.log("📱 Dados carregados do localStorage:", presentes.length, "presentes");
-        extrairCategorias();
-        atualizarSelectCategorias();
     } else {
         if (presentes.length === 0) {
             presentes = [
@@ -203,7 +159,7 @@ function carregarDadosLocais() {
                 {
                     id: (Date.now() + 1).toString(),
                     nome: "Jogo de Lençóis Casal",
-                    categoria: "Casa",
+                    categoria: "Cama",
                     url: "https://www.americanas.com.br/",
                     preco: 189.90,
                     imagem: "https://via.placeholder.com/300x200/D67A5A/FFFFFF?text=Lençóis",
@@ -213,18 +169,39 @@ function carregarDadosLocais() {
                 },
                 {
                     id: (Date.now() + 2).toString(),
-                    nome: "Air Fryer",
-                    categoria: "Eletrodomésticos",
+                    nome: "Toalhas de Banho",
+                    categoria: "Banho",
                     url: "https://www.amazon.com.br/",
-                    preco: 399.90,
-                    imagem: "https://via.placeholder.com/300x200/D67A5A/FFFFFF?text=Air+Fryer",
+                    preco: 129.90,
+                    imagem: "https://via.placeholder.com/300x200/D67A5A/FFFFFF?text=Toalhas",
+                    comprado: false,
+                    comprador: null,
+                    dataCompra: null
+                },
+                {
+                    id: (Date.now() + 3).toString(),
+                    nome: "Contribuição para Lua de Mel",
+                    categoria: "Pix",
+                    url: "https://nubank.com.br/",
+                    preco: 500.00,
+                    imagem: "https://via.placeholder.com/300x200/D67A5A/FFFFFF?text=Pix",
+                    comprado: false,
+                    comprador: null,
+                    dataCompra: null
+                },
+                {
+                    id: (Date.now() + 4).toString(),
+                    nome: "Jogo de Jantar",
+                    categoria: "Mesa",
+                    url: "https://www.magazineluiza.com.br/",
+                    preco: 249.90,
+                    imagem: "https://via.placeholder.com/300x200/D67A5A/FFFFFF?text=Jogo+de+Jantar",
                     comprado: false,
                     comprador: null,
                     dataCompra: null
                 }
             ];
             console.log("📱 Dados iniciais criados");
-            extrairCategorias();
             salvarNaNuvem();
         }
     }
@@ -239,8 +216,6 @@ function salvarNoLocalStorage() {
 window.salvarDadosGlobal = async function() {
     salvarNoLocalStorage();
     const sucesso = await salvarNaNuvem();
-    extrairCategorias();
-    atualizarSelectCategorias();
     renderCarrossel();
     
     if (typeof window.atualizarAdmin === 'function') {
@@ -321,16 +296,8 @@ function iniciarContador() {
 }
 
 // ============================================
-// FUNÇÕES DO CARROSSEL COM FILTROS
+// FUNÇÕES DO FILTRO
 // ============================================
-
-function getItemsPorSlide() {
-    const width = window.innerWidth;
-    if (width <= 480) return 1;
-    if (width <= 768) return 2;
-    if (width <= 1024) return 3;
-    return 4;
-}
 
 function aplicarFiltros() {
     let filteredPresentes = [...presentes];
@@ -342,12 +309,97 @@ function aplicarFiltros() {
         filteredPresentes = filteredPresentes.filter(p => p.comprado);
     }
     
-    // Filtro por categoria
-    if (currentCategory !== 'all') {
+    // Filtro por categoria (apenas se não estiver no filtro "comprados")
+    if (currentCategory !== 'all' && currentFilter !== 'purchased') {
         filteredPresentes = filteredPresentes.filter(p => p.categoria === currentCategory);
     }
     
     return filteredPresentes;
+}
+
+function setupFilters() {
+    // Botões de status (Todos, Disponíveis, Comprados)
+    const statusBtns = document.querySelectorAll('.filter-btn[data-filter]');
+    
+    statusBtns.forEach(btn => {
+        btn.addEventListener('click', () => {
+            // Remove active de todos os botões de status
+            statusBtns.forEach(b => b.classList.remove('active'));
+            btn.classList.add('active');
+            
+            // Remove active de todos os botões de categoria
+            document.querySelectorAll('.category-btn').forEach(b => b.classList.remove('active'));
+            
+            // Atualiza os filtros
+            currentFilter = btn.dataset.filter;
+            currentCategory = 'all';
+            currentSlide = 0;
+            
+            // Se for filtro "comprados", desabilita visualmente os botões de categoria
+            if (currentFilter === 'purchased') {
+                document.querySelectorAll('.category-btn').forEach(b => {
+                    b.style.opacity = '0.5';
+                    b.style.cursor = 'not-allowed';
+                });
+            } else {
+                document.querySelectorAll('.category-btn').forEach(b => {
+                    b.style.opacity = '1';
+                    b.style.cursor = 'pointer';
+                });
+            }
+            
+            renderCarrossel();
+        });
+    });
+    
+    // Botões de categoria (Cozinha, Cama, Banho, Pix, Mesa)
+    const categoryBtns = document.querySelectorAll('.category-btn');
+    
+    categoryBtns.forEach(btn => {
+        btn.addEventListener('click', () => {
+            // Se estiver no filtro "comprados", não permite filtrar por categoria
+            if (currentFilter === 'purchased') {
+                alert('Para filtrar por categoria, selecione "Todos" ou "Disponíveis" primeiro.');
+                return;
+            }
+            
+            // Remove active de todos os botões de categoria
+            categoryBtns.forEach(b => b.classList.remove('active'));
+            btn.classList.add('active');
+            
+            // Remove active dos botões de status (opcional - remove o destaque)
+            document.querySelectorAll('.filter-btn[data-filter]').forEach(b => {
+                b.classList.remove('active');
+            });
+            
+            // Atualiza a categoria atual
+            currentCategory = btn.dataset.category;
+            currentFilter = 'available'; // Muda automaticamente para "Disponíveis"
+            currentSlide = 0;
+            
+            renderCarrossel();
+        });
+    });
+    
+    // Estado inicial: garantir que os botões de categoria estejam ativos visualmente
+    if (currentFilter === 'purchased') {
+        document.querySelectorAll('.category-btn').forEach(b => {
+            b.style.opacity = '0.5';
+            b.style.cursor = 'not-allowed';
+        });
+    }
+}
+
+// ============================================
+// FUNÇÕES DO CARROSSEL
+// ============================================
+
+function getItemsPorSlide() {
+    const width = window.innerWidth;
+    if (width <= 480) return 1;
+    if (width <= 768) return 2;
+    if (width <= 1024) return 3;
+    return 4;
 }
 
 function renderCarrossel() {
@@ -359,7 +411,15 @@ function renderCarrossel() {
     const filteredPresentes = aplicarFiltros();
     
     if (filteredPresentes.length === 0) {
-        container.innerHTML = '<div class="loading">Nenhum presente encontrado nesta categoria.</div>';
+        let mensagem = 'Nenhum presente encontrado.';
+        if (currentCategory !== 'all') {
+            mensagem = `Nenhum presente encontrado na categoria "${currentCategory}".`;
+        } else if (currentFilter === 'available') {
+            mensagem = 'Nenhum presente disponível no momento.';
+        } else if (currentFilter === 'purchased') {
+            mensagem = 'Nenhum presente foi comprado ainda.';
+        }
+        container.innerHTML = `<div class="loading">${mensagem}</div>`;
         if (dotsContainer) dotsContainer.innerHTML = '';
         totalSlides = 0;
         return;
@@ -477,35 +537,6 @@ function prevSlide() {
 }
 
 // ============================================
-// FILTROS
-// ============================================
-
-function setupFilters() {
-    const filterBtns = document.querySelectorAll('.filter-btn');
-    const categorySelect = document.getElementById('categoryFilter');
-    
-    // Filtros de status (Todos, Disponíveis, Comprados)
-    filterBtns.forEach(btn => {
-        btn.addEventListener('click', () => {
-            filterBtns.forEach(b => b.classList.remove('active'));
-            btn.classList.add('active');
-            currentFilter = btn.dataset.filter;
-            currentSlide = 0;
-            renderCarrossel();
-        });
-    });
-    
-    // Filtro de categorias
-    if (categorySelect) {
-        categorySelect.addEventListener('change', (e) => {
-            currentCategory = e.target.value;
-            currentSlide = 0;
-            renderCarrossel();
-        });
-    }
-}
-
-// ============================================
 // BOTÃO VOLTAR AO TOPO
 // ============================================
 
@@ -545,8 +576,6 @@ function escapeHtml(text) {
 window.getPresentes = () => presentes;
 window.setPresentes = (novaLista) => {
     presentes = novaLista;
-    extrairCategorias();
-    atualizarSelectCategorias();
     salvarNoLocalStorage();
 };
 

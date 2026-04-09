@@ -420,12 +420,6 @@ hr {
 }
 
 /* Cards de Presentes */
-.presentes-grid {
-    display: grid;
-    grid-template-columns: repeat(auto-fill, minmax(320px, 1fr));
-    gap: 35px;
-}
-
 .presente-card {
     background: white;
     border-radius: var(--border-radius);
@@ -433,6 +427,9 @@ hr {
     box-shadow: var(--shadow);
     transition: all 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
     position: relative;
+    height: 100%;
+    display: flex;
+    flex-direction: column;
 }
 
 .presente-card::before {
@@ -469,7 +466,9 @@ hr {
 
 .presente-info {
     padding: 25px;
-    position: relative;
+    flex: 1;
+    display: flex;
+    flex-direction: column;
 }
 
 .presente-nome {
@@ -487,12 +486,6 @@ hr {
     margin-bottom: 15px;
 }
 
-.presente-preco::before {
-    content: 'R$ ';
-    font-size: 1rem;
-    font-weight: normal;
-}
-
 .presente-status {
     display: inline-block;
     padding: 6px 14px;
@@ -501,6 +494,7 @@ hr {
     margin-bottom: 18px;
     font-weight: 600;
     letter-spacing: 0.5px;
+    align-self: flex-start;
 }
 
 .status-disponivel {
@@ -525,6 +519,7 @@ hr {
     text-align: center;
     font-weight: 500;
     letter-spacing: 0.5px;
+    margin-top: auto;
 }
 
 .presente-link:hover {
@@ -602,7 +597,144 @@ footer p {
     to { transform: rotate(360deg); }
 }
 
-/* Responsividade */
+/* ============================================
+   CARROSSEL - GRUPOS DE 4 PRODUTOS
+   ============================================ */
+
+.carousel-container {
+    position: relative;
+    display: flex;
+    align-items: center;
+    gap: 15px;
+    margin: 40px 0;
+}
+
+.carousel-wrapper {
+    overflow: hidden;
+    flex: 1;
+    border-radius: 20px;
+}
+
+.carousel-track {
+    display: flex;
+    transition: transform 0.5s ease-in-out;
+}
+
+.carousel-slide {
+    flex: 0 0 100%;
+    display: grid;
+    grid-template-columns: repeat(4, 1fr);
+    gap: 30px;
+    padding: 5px;
+}
+
+/* Botões do carrossel */
+.carousel-btn {
+    width: 50px;
+    height: 50px;
+    border-radius: 50%;
+    background: linear-gradient(135deg, var(--terra-cota-primary), var(--terra-cota-dark));
+    color: white;
+    border: none;
+    cursor: pointer;
+    font-size: 1.5rem;
+    transition: all 0.3s ease;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    flex-shrink: 0;
+    box-shadow: var(--shadow);
+}
+
+.carousel-btn:hover {
+    transform: scale(1.1);
+    box-shadow: var(--shadow-hover);
+}
+
+.carousel-btn:active {
+    transform: scale(0.95);
+}
+
+.carousel-btn:disabled {
+    opacity: 0.5;
+    cursor: not-allowed;
+    transform: none;
+}
+
+/* Indicadores (dots) */
+.carousel-dots {
+    display: flex;
+    justify-content: center;
+    gap: 12px;
+    margin: 30px 0 20px;
+}
+
+.dot {
+    width: 10px;
+    height: 10px;
+    border-radius: 50%;
+    background: var(--terra-cota-border);
+    cursor: pointer;
+    transition: all 0.3s ease;
+}
+
+.dot.active {
+    width: 30px;
+    border-radius: 10px;
+    background: var(--terra-cota-primary);
+}
+
+.dot:hover {
+    background: var(--terra-cota-primary);
+    transform: scale(1.2);
+}
+
+/* Botão Voltar ao Topo */
+.back-to-top {
+    position: fixed;
+    bottom: 100px;
+    right: 30px;
+    width: 50px;
+    height: 50px;
+    border-radius: 50%;
+    background: linear-gradient(135deg, var(--terra-cota-primary), var(--terra-cota-dark));
+    color: white;
+    border: none;
+    cursor: pointer;
+    font-size: 1.5rem;
+    box-shadow: var(--shadow);
+    transition: all 0.3s ease;
+    z-index: 999;
+    opacity: 0;
+    visibility: hidden;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.back-to-top.show {
+    opacity: 1;
+    visibility: visible;
+}
+
+.back-to-top:hover {
+    transform: translateY(-5px);
+    box-shadow: var(--shadow-hover);
+}
+
+/* ============================================
+   RESPONSIVIDADE
+   ============================================ */
+
+/* Tablet: 3 itens por slide */
+@media (max-width: 1024px) {
+    .carousel-slide {
+        grid-template-columns: repeat(3, 1fr);
+        gap: 20px;
+    }
+}
+
+/* Mobile: 2 itens por slide */
 @media (max-width: 768px) {
     .hero h1 {
         font-size: 2.5rem;
@@ -621,14 +753,36 @@ footer p {
         font-size: 1rem;
     }
     
-    .presentes-grid {
-        grid-template-columns: 1fr;
-        gap: 25px;
+    .countdown-item {
+        padding: 10px 15px;
+        min-width: 70px;
     }
     
-    .modal-content {
-        width: 95%;
-        margin: 20px auto;
+    .countdown-item span {
+        font-size: 1.5rem;
+    }
+    
+    .carousel-container {
+        gap: 8px;
+    }
+    
+    .carousel-slide {
+        grid-template-columns: repeat(2, 1fr);
+        gap: 15px;
+    }
+    
+    .carousel-btn {
+        width: 40px;
+        height: 40px;
+        font-size: 1.2rem;
+    }
+    
+    .back-to-top {
+        bottom: 80px;
+        right: 20px;
+        width: 45px;
+        height: 45px;
+        font-size: 1.2rem;
     }
     
     .filters {
@@ -639,21 +793,9 @@ footer p {
         padding: 8px 20px;
         font-size: 0.85rem;
     }
-    
-    .countdown-item {
-        padding: 10px 15px;
-        min-width: 70px;
-    }
-    
-    .countdown-item span {
-        font-size: 1.5rem;
-    }
-    
-    .countdown-item small {
-        font-size: 0.7rem;
-    }
 }
 
+/* Mobile pequeno: 1 item por slide */
 @media (max-width: 480px) {
     .hero {
         padding: 60px 20px 80px;
@@ -663,8 +805,45 @@ footer p {
         font-size: 1.8rem;
     }
     
+    .hero h1 i {
+        font-size: 1.2rem;
+        margin: 0 5px;
+    }
+    
     .container {
         padding: 40px 15px;
+    }
+    
+    .carousel-slide {
+        grid-template-columns: 1fr;
+        gap: 20px;
+    }
+    
+    .carousel-btn {
+        width: 35px;
+        height: 35px;
+        font-size: 1rem;
+    }
+    
+    .carousel-dots {
+        gap: 8px;
+    }
+    
+    .dot {
+        width: 8px;
+        height: 8px;
+    }
+    
+    .dot.active {
+        width: 25px;
+    }
+    
+    .back-to-top {
+        bottom: 70px;
+        right: 15px;
+        width: 40px;
+        height: 40px;
+        font-size: 1rem;
     }
 }
 
@@ -684,216 +863,4 @@ footer p {
 
 ::-webkit-scrollbar-thumb:hover {
     background: var(--terra-cota-dark);
-}
-/* ============================================
-   MELHORIAS ESPECÍFICAS PARA MOBILE
-   ============================================ */
-
-/* Ajustes para telas muito pequenas */
-@media (max-width: 480px) {
-    /* Header */
-    .hero {
-        padding: 50px 15px 70px;
-    }
-    
-    .hero h1 {
-        font-size: 1.8rem;
-    }
-    
-    .hero h1 i {
-        font-size: 1.2rem;
-        margin: 0 5px;
-    }
-    
-    .hero .date {
-        font-size: 0.9rem;
-    }
-    
-    .hero h2 {
-        font-size: 1.5rem;
-    }
-    
-    .hero .subtitle {
-        font-size: 0.9rem;
-        padding: 0 10px;
-    }
-    
-    /* Contador */
-    .countdown {
-        gap: 8px;
-        margin: 25px 0 20px;
-    }
-    
-    .countdown-item {
-        padding: 8px 12px;
-        min-width: 60px;
-    }
-    
-    .countdown-item span {
-        font-size: 1.2rem;
-    }
-    
-    .countdown-item small {
-        font-size: 0.6rem;
-    }
-    
-    /* Botões de filtro */
-    .filters {
-        gap: 8px;
-        margin-bottom: 30px;
-    }
-    
-    .filter-btn {
-        padding: 8px 16px;
-        font-size: 0.8rem;
-    }
-    
-    /* Cards */
-    .presentes-grid {
-        gap: 20px;
-    }
-    
-    .presente-imagem {
-        height: 180px;
-    }
-    
-    .presente-info {
-        padding: 15px;
-    }
-    
-    .presente-nome {
-        font-size: 1rem;
-    }
-    
-    .presente-preco {
-        font-size: 1.2rem;
-    }
-    
-    .presente-link {
-        padding: 10px 15px;
-        font-size: 0.9rem;
-    }
-    
-    /* Modal */
-    .modal-content {
-        width: 95%;
-        margin: 10px auto;
-        max-height: 90vh;
-    }
-    
-    .modal-header {
-        padding: 15px;
-    }
-    
-    .modal-header h2 {
-        font-size: 1.2rem;
-    }
-    
-    .modal-body {
-        padding: 20px;
-    }
-    
-    .admin-tabs {
-        gap: 5px;
-    }
-    
-    .tab-btn {
-        padding: 8px 12px;
-        font-size: 0.85rem;
-    }
-    
-    /* Formulários */
-    .form-group input {
-        padding: 10px 12px;
-        font-size: 0.9rem;
-    }
-    
-    .btn-primary {
-        padding: 12px 20px;
-        font-size: 0.9rem;
-    }
-    
-    /* Admin cards */
-    #adminPresentesList > div {
-        grid-template-columns: 1fr !important;
-    }
-    
-    /* Footer */
-    footer {
-        padding: 30px 15px;
-        font-size: 0.8rem;
-    }
-    
-    footer::before {
-        width: 40px;
-        height: 40px;
-        font-size: 25px;
-        top: -15px;
-    }
-}
-
-/* Para tablets */
-@media (min-width: 481px) and (max-width: 768px) {
-    .presentes-grid {
-        grid-template-columns: repeat(2, 1fr);
-        gap: 20px;
-    }
-    
-    .hero h1 {
-        font-size: 2.5rem;
-    }
-    
-    .countdown-item {
-        padding: 12px 18px;
-        min-width: 75px;
-    }
-}
-
-/* Melhorias de toque para mobile */
-@media (max-width: 768px) {
-    /* Aumenta área de toque dos botões */
-    .filter-btn,
-    .presente-link,
-    .btn-primary,
-    .tab-btn,
-    .admin-toggle-btn {
-        cursor: pointer;
-        -webkit-tap-highlight-color: transparent;
-    }
-    
-    /* Previne zoom em inputs no iOS */
-    .form-group input,
-    .form-group select,
-    .form-group textarea {
-        font-size: 16px !important;
-    }
-    
-    /* Botão admin mais acessível */
-    .admin-toggle-btn {
-        width: 50px;
-        height: 50px;
-        bottom: 20px;
-        right: 20px;
-    }
-    
-    /* Rolagem suave */
-    html {
-        scroll-behavior: smooth;
-    }
-    
-    /* Modal ocupa mais espaço no mobile */
-    .modal-content {
-        border-radius: 15px;
-    }
-}
-
-/* Previne zoom indesejado */
-input, select, textarea, button {
-    touch-action: manipulation;
-}
-
-/* Melhora a legibilidade */
-body {
-    -webkit-font-smoothing: antialiased;
-    -moz-osx-font-smoothing: grayscale;
 }

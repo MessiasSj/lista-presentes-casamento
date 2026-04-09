@@ -531,16 +531,10 @@ hr {
 
 /* PREÇO - COMPACTO */
 .presente-preco {
-    font-size: 1.3rem;
+    font-size: 2.0rem;
     font-weight: bold;
     color: var(--terra-cota-primary);
     margin-bottom: 0;
-}
-
-.presente-preco::before {
-    content: 'R$ ';
-    font-size: 1.0rem;
-    font-weight: normal;
 }
 
 /* STATUS - PEQUENO */

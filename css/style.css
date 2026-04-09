@@ -1,6 +1,6 @@
 /* ============================================
    TEMA MODERNO TERRA COTA - CASAMENTO
-   TEXTO COMPACTO (2 LINHAS) + BOTÕES VISÍVEIS
+   VERSÃO FINAL - BOTÕES DESCENDO 4PX
    ============================================ */
 
 :root {
@@ -454,7 +454,7 @@ hr {
 }
 
 /* ============================================
-   CARDS - TEXTO COMPACTO (2 LINHAS) + BOTÕES
+   CARDS - VERSÃO FINAL
    ============================================ */
 
 .presente-card {
@@ -466,7 +466,7 @@ hr {
     position: relative;
     display: flex;
     flex-direction: column;
-    aspect-ratio: 1 / 1.25;
+    aspect-ratio: 1 / 1.30;
     height: auto;
     width: 100%;
 }
@@ -492,10 +492,9 @@ hr {
     transform: scaleX(1);
 }
 
-/* IMAGEM - ocupa 50% do card */
 .presente-imagem {
     width: 100%;
-    height: 50%;
+    height: 48%;
     object-fit: cover;
     transition: transform 0.5s;
 }
@@ -504,45 +503,44 @@ hr {
     transform: scale(1.02);
 }
 
-/* ÁREA DE TEXTO - REDUZIDA PELA METADE */
 .presente-info {
-    padding: 8px 10px 10px 10px;
+    padding: 10px 12px 12px 12px;
     flex: 1;
     display: flex;
     flex-direction: column;
-    gap: 4px;
-    height: 50%;
+    gap: 6px;
+    height: 52%;
 }
 
-/* NOME - APENAS 2 LINHAS */
 .presente-nome {
-    font-size: 0.8rem;
+    font-size: 0.85rem;
     margin-bottom: 0;
     color: var(--text-dark);
     font-weight: 600;
     font-family: 'Playfair Display', serif;
-    line-height: 1.25;
+    line-height: 1.3;
     display: -webkit-box;
     -webkit-line-clamp: 2;
     -webkit-box-orient: vertical;
     overflow: hidden;
-    min-height: 2em;
+    min-height: 2.2em;
 }
 
-/* PREÇO - COMPACTO */
+/* PREÇO - GRANDE E DESTACADO */
 .presente-preco {
-    font-size: 2.0rem;
+    font-size: 2.2rem;
     font-weight: bold;
     color: var(--terra-cota-primary);
     margin-bottom: 0;
+    line-height: 1.1;
 }
 
-/* STATUS - PEQUENO */
+/* STATUS */
 .presente-status {
     display: inline-block;
-    padding: 2px 6px;
-    border-radius: 10px;
-    font-size: 0.8rem;
+    padding: 3px 8px;
+    border-radius: 12px;
+    font-size: 0.65rem;
     margin-bottom: 0;
     font-weight: 600;
     align-self: flex-start;
@@ -558,31 +556,32 @@ hr {
     color: white;
 }
 
-/* BOTÕES - SUBIDOS E VISÍVEIS */
+/* BOTÕES - 8px 8px e descendo 4px */
 .presente-link {
     display: inline-block;
     background: linear-gradient(135deg, var(--terra-cota-primary), var(--terra-cota-dark));
     color: white;
-    padding: 5px 8px;
+    padding: 8px 8px;
     text-decoration: none;
-    border-radius: 6px;
+    border-radius: 8px;
     transition: 0.3s;
     width: 100%;
     text-align: center;
     font-weight: 500;
-    font-size: 0.65rem;
+    font-size: 0.75rem;
     letter-spacing: 0.3px;
-    margin-top: 2px;
+    margin-top: 4px;
 }
 
 .presente-link:hover {
     transform: translateY(-1px);
-    box-shadow: 0 4px 10px rgba(214, 122, 90, 0.3);
+    box-shadow: 0 2px 8px rgba(214, 122, 90, 0.3);
 }
 
+/* BOTÃO COMPRAR - descendo 4px também */
 .btn-comprar {
     background: linear-gradient(135deg, var(--success), #5a7a4a);
-    margin-top: 4px;
+    margin-top: 8px;
 }
 
 .btn-comprado {
@@ -592,11 +591,11 @@ hr {
     transform: none;
 }
 
-/* Texto do comprador - escondido ou muito pequeno */
+/* Texto do comprador */
 .presente-info p {
-    font-size: 0.9rem;
+    font-size: 0.6rem;
     margin-bottom: 0;
-    line-height: 1.2;
+    line-height: 1.3;
 }
 
 /* ============================================
@@ -775,7 +774,11 @@ footer p {
     }
     
     .presente-card {
-        aspect-ratio: 1 / 1.3;
+        aspect-ratio: 1 / 1.35;
+    }
+    
+    .presente-preco {
+        font-size: 1.8rem;
     }
     
     .hero h1 {
@@ -844,32 +847,37 @@ footer p {
     }
     
     .presente-card {
-        aspect-ratio: 1 / 1.35;
+        aspect-ratio: 1 / 1.40;
         max-width: 380px;
         margin: 0 auto;
         width: 100%;
     }
     
     .presente-imagem {
-        height: 48%;
+        height: 45%;
     }
     
     .presente-info {
-        padding: 8px 10px 10px 10px;
-        gap: 4px;
+        padding: 10px 12px 12px 12px;
+        gap: 6px;
     }
     
     .presente-nome {
-        font-size: 0.8rem;
+        font-size: 0.85rem;
     }
     
     .presente-preco {
-        font-size: 0.9rem;
+        font-size: 1.6rem;
     }
     
     .presente-link {
-        padding: 5px 8px;
-        font-size: 0.65rem;
+        padding: 8px 8px;
+        font-size: 0.7rem;
+        margin-top: 4px;
+    }
+    
+    .btn-comprar {
+        margin-top: 8px;
     }
     
     .carousel-container {

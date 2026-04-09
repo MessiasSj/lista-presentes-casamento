@@ -1,7 +1,7 @@
 // ============================================
 // APP.JS - Lista de Presentes de Casamento
 // Sincronização com Sheet.best (Nuvem)
-// CORRIGIDO: Exclusão, Adição e Compra funcionando
+// Com Carrossel e Botão Voltar ao Topo
 // ============================================
 
 // SUA URL DO SHEET.BEST
@@ -9,6 +9,11 @@ const API_URL = 'https://api.sheetbest.com/sheets/b9510bd2-4034-435c-947b-6cd5cb
 
 let currentFilter = 'all';
 let presentes = [];
+
+// Variáveis do carrossel
+let currentSlide = 0;
+let totalSlides = 0;
+let slides = [];
 
 // ============================================
 // FUNÇÕES DE SINCRONIZAÇÃO COM A NUVEM
@@ -26,7 +31,6 @@ async function carregarDaNuvem() {
         const dados = await response.json();
         
         if (dados && dados.length > 0) {
-            // Converter os dados para o formato padronizado
             presentes = dados.map(item => ({
                 id: String(item.id),
                 nome: item.nome,
@@ -44,32 +48,28 @@ async function carregarDaNuvem() {
         }
         
         salvarNoLocalStorage();
-        renderPresentes();
+        renderCarrossel();
         
-        // Atualizar admin se estiver logado
         if (typeof window.atualizarAdmin === 'function') {
             window.atualizarAdmin();
         }
         
     } catch(error) {
         console.error("❌ Erro ao carregar da nuvem:", error);
-        console.log("📱 Usando dados do localStorage...");
         carregarDadosLocais();
-        renderPresentes();
+        renderCarrossel();
     }
 }
 
 // Função para atualizar um presente específico (PUT)
 async function atualizarPresenteNaNuvem(presenteAtualizado) {
     try {
-        // Busca o presente pelo ID
         const response = await fetch(`${API_URL}/id/${presenteAtualizado.id}`);
         const dados = await response.json();
         
         if (dados && dados.length > 0) {
-            const linhaId = dados[0].id; // Pega o ID da linha
+            const linhaId = dados[0].id;
             
-            // Prepara os dados atualizados
             const dadosAtualizados = {
                 nome: presenteAtualizado.nome,
                 url: presenteAtualizado.url,
@@ -80,17 +80,13 @@ async function atualizarPresenteNaNuvem(presenteAtualizado) {
                 dataCompra: presenteAtualizado.dataCompra || ''
             };
             
-            // Atualiza a linha específica
             const updateResponse = await fetch(`${API_URL}/id/${linhaId}`, {
                 method: 'PUT',
                 headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify(dadosAtualizados)
             });
             
-            if (updateResponse.ok) {
-                console.log("✅ Presente atualizado na nuvem!");
-                return true;
-            }
+            return updateResponse.ok;
         }
         return false;
     } catch(error) {
@@ -99,12 +95,11 @@ async function atualizarPresenteNaNuvem(presenteAtualizado) {
     }
 }
 
-// Salvar TODOS os dados na planilha (usado para adicionar/excluir)
+// Salvar TODOS os dados na planilha
 async function salvarNaNuvem() {
     try {
         console.log("💾 Salvando dados na nuvem...");
         
-        // Prepara os dados para enviar
         const dadosParaSalvar = presentes.map(p => ({
             id: p.id,
             nome: p.nome,
@@ -116,10 +111,8 @@ async function salvarNaNuvem() {
             dataCompra: p.dataCompra || ''
         }));
         
-        // Primeiro, limpa todos os dados existentes
         await fetch(API_URL, { method: 'DELETE' });
         
-        // Depois, envia os dados atualizados
         const response = await fetch(API_URL, {
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },
@@ -129,10 +122,8 @@ async function salvarNaNuvem() {
         if (response.ok) {
             console.log("✅ Dados salvos na nuvem com sucesso!");
             return true;
-        } else {
-            console.log("⚠️ Erro ao salvar na nuvem");
-            return false;
         }
+        return false;
         
     } catch(error) {
         console.error("❌ Erro ao salvar na nuvem:", error);
@@ -140,7 +131,6 @@ async function salvarNaNuvem() {
     }
 }
 
-// Carregar dados locais (fallback)
 function carregarDadosLocais() {
     const stored = localStorage.getItem('presentes_casamento');
     
@@ -148,7 +138,6 @@ function carregarDadosLocais() {
         presentes = JSON.parse(stored);
         console.log("📱 Dados carregados do localStorage:", presentes.length, "presentes");
     } else {
-        // Dados iniciais (apenas se não houver nada)
         if (presentes.length === 0) {
             presentes = [
                 {
@@ -163,37 +152,35 @@ function carregarDadosLocais() {
                 }
             ];
             console.log("📱 Dados iniciais criados");
-            salvarNaNuvem(); // Sincroniza com a nuvem
+            salvarNaNuvem();
         }
     }
     
     salvarNoLocalStorage();
 }
 
-// Salvar no localStorage
 function salvarNoLocalStorage() {
     localStorage.setItem('presentes_casamento', JSON.stringify(presentes));
 }
 
-// Função global para salvar dados (usada pelo admin)
 window.salvarDadosGlobal = async function() {
     salvarNoLocalStorage();
     const sucesso = await salvarNaNuvem();
-    renderPresentes();
+    renderCarrossel();
     
-    // Atualizar admin se necessário
     if (typeof window.atualizarAdmin === 'function') {
         window.atualizarAdmin();
     }
     
     if (sucesso) {
         console.log("✅ Sincronização completa!");
-    } else {
-        console.warn("⚠️ Dados salvos apenas localmente. Verifique sua conexão.");
     }
 };
 
-// Função para marcar como comprado (atualização individual)
+// ============================================
+// MARCAR COMO COMPRADO
+// ============================================
+
 window.marcarComoComprado = async function(id) {
     const presente = presentes.find(p => String(p.id) === String(id));
     if (!presente || presente.comprado) return;
@@ -205,23 +192,17 @@ window.marcarComoComprado = async function(id) {
         presente.comprador = compradorNome.trim();
         presente.dataCompra = new Date().toISOString();
         
-        // Tenta atualizar individualmente primeiro
         const atualizado = await atualizarPresenteNaNuvem(presente);
-        
-        if (!atualizado) {
-            // Se falhar, faz o save completo
-            await salvarNaNuvem();
-        }
+        if (!atualizado) await salvarNaNuvem();
         
         salvarNoLocalStorage();
-        renderPresentes();
+        renderCarrossel();
         
-        // Atualizar admin se necessário
         if (typeof window.atualizarAdmin === 'function') {
             window.atualizarAdmin();
         }
         
-        alert(`✅ Obrigado ${compradorNome}!\n\n🎁 Presente: ${presente.nome}\n💰 Valor: R$ ${presente.preco.toFixed(2)}\n\nSua gentileza foi registrada com sucesso!`);
+        alert(`✅ Obrigado ${compradorNome}!\n\n🎁 Presente: ${presente.nome}\n💰 Valor: R$ ${presente.preco.toFixed(2)}`);
         
     } else if (compradorNome === '') {
         alert('❌ Por favor, digite seu nome para confirmar a compra.');
@@ -265,19 +246,24 @@ function iniciarContador() {
 }
 
 // ============================================
-// FUNÇÕES DOS PRESENTES
+// FUNÇÕES DO CARROSSEL
 // ============================================
 
-function loadPresentes() {
-    carregarDaNuvem();
+function getItemsPorSlide() {
+    const width = window.innerWidth;
+    if (width <= 480) return 1;
+    if (width <= 768) return 2;
+    if (width <= 1024) return 3;
+    return 4;
 }
 
-function renderPresentes() {
-    const container = document.getElementById('presentesList');
+function renderCarrossel() {
+    const container = document.getElementById('carouselTrack');
+    const dotsContainer = document.getElementById('carouselDots');
+    
     if (!container) return;
     
-    // IMPORTANTE: Filtra corretamente sem duplicar
-    let filteredPresentes = [...presentes]; // Cria uma cópia
+    let filteredPresentes = [...presentes];
     
     if (currentFilter === 'available') {
         filteredPresentes = filteredPresentes.filter(p => !p.comprado);
@@ -287,46 +273,121 @@ function renderPresentes() {
     
     if (filteredPresentes.length === 0) {
         container.innerHTML = '<div class="loading">Nenhum presente encontrado nesta categoria.</div>';
+        if (dotsContainer) dotsContainer.innerHTML = '';
         return;
     }
     
-    container.innerHTML = filteredPresentes.map(presente => `
-        <div class="presente-card" data-id="${presente.id}">
-            <img src="${presente.imagem || 'https://via.placeholder.com/300x200/E8C9BC/4A3728?text=Sem+Imagem'}" 
-                 alt="${presente.nome}" 
-                 class="presente-imagem"
-                 onerror="this.src='https://via.placeholder.com/300x200/E8C9BC/4A3728?text=Imagem+não+disponível'">
-            <div class="presente-info">
-                <h3 class="presente-nome">${escapeHtml(presente.nome)}</h3>
-                <p class="presente-preco">R$ ${presente.preco.toFixed(2)}</p>
-                <span class="presente-status ${presente.comprado ? 'status-comprado' : 'status-disponivel'}">
-                    ${presente.comprado ? '✓ Comprado' : '✓ Disponível'}
-                </span>
-                ${presente.comprado ? `
-                    <p style="font-size: 0.85rem; color: var(--text-light); margin-bottom: 15px;">
-                        <i class="fas fa-user"></i> Comprado por: ${escapeHtml(presente.comprador || 'Anônimo')}<br>
-                        <i class="fas fa-calendar"></i> Em: ${presente.dataCompra ? new Date(presente.dataCompra).toLocaleDateString('pt-BR') : 'Data não registrada'}
-                    </p>
-                ` : ''}
-                <a href="${presente.url}" target="_blank" class="presente-link ${presente.comprado ? 'btn-comprado' : ''}">
-                    ${presente.comprado ? 'Presente já foi comprado' : 'Ver na Loja →'}
-                </a>
-                ${!presente.comprado ? `
-                    <button onclick="marcarComoComprado('${presente.id}')" class="presente-link btn-comprar">
-                        <i class="fas fa-gift"></i> Já comprei este presente
-                    </button>
-                ` : ''}
-            </div>
+    const itemsPorSlide = getItemsPorSlide();
+    slides = [];
+    
+    for (let i = 0; i < filteredPresentes.length; i += itemsPorSlide) {
+        const slideItems = filteredPresentes.slice(i, i + itemsPorSlide);
+        slides.push(slideItems);
+    }
+    
+    totalSlides = slides.length;
+    currentSlide = Math.min(currentSlide, totalSlides - 1);
+    if (currentSlide < 0) currentSlide = 0;
+    
+    container.innerHTML = slides.map((slide, index) => `
+        <div class="carousel-slide" data-slide="${index}">
+            ${slide.map(presente => `
+                <div class="presente-card" data-id="${presente.id}">
+                    <img src="${presente.imagem || 'https://via.placeholder.com/300x200/E8C9BC/4A3728?text=Sem+Imagem'}" 
+                         alt="${presente.nome}" 
+                         class="presente-imagem"
+                         onerror="this.src='https://via.placeholder.com/300x200/E8C9BC/4A3728?text=Imagem+não+disponível'">
+                    <div class="presente-info">
+                        <h3 class="presente-nome">${escapeHtml(presente.nome)}</h3>
+                        <p class="presente-preco">R$ ${presente.preco.toFixed(2)}</p>
+                        <span class="presente-status ${presente.comprado ? 'status-comprado' : 'status-disponivel'}">
+                            ${presente.comprado ? '✓ Comprado' : '✓ Disponível'}
+                        </span>
+                        ${presente.comprado ? `
+                            <p style="font-size: 0.85rem; color: var(--text-light); margin-bottom: 15px;">
+                                <i class="fas fa-user"></i> Comprado por: ${escapeHtml(presente.comprador || 'Anônimo')}<br>
+                                <i class="fas fa-calendar"></i> Em: ${presente.dataCompra ? new Date(presente.dataCompra).toLocaleDateString('pt-BR') : 'Data não registrada'}
+                            </p>
+                        ` : ''}
+                        <a href="${presente.url}" target="_blank" class="presente-link ${presente.comprado ? 'btn-comprado' : ''}">
+                            ${presente.comprado ? 'Presente já foi comprado' : 'Ver na Loja →'}
+                        </a>
+                        ${!presente.comprado ? `
+                            <button onclick="marcarComoComprado('${presente.id}')" class="presente-link btn-comprar">
+                                <i class="fas fa-gift"></i> Já comprei este presente
+                            </button>
+                        ` : ''}
+                    </div>
+                </div>
+            `).join('')}
         </div>
     `).join('');
+    
+    // Atualizar dots
+    if (dotsContainer) {
+        dotsContainer.innerHTML = slides.map((_, index) => `
+            <div class="dot ${index === currentSlide ? 'active' : ''}" data-slide="${index}"></div>
+        `).join('');
+        
+        document.querySelectorAll('.dot').forEach(dot => {
+            dot.addEventListener('click', () => {
+                currentSlide = parseInt(dot.dataset.slide);
+                updateCarouselPosition();
+                updateDots();
+            });
+        });
+    }
+    
+    updateCarouselPosition();
+    updateButtonsState();
 }
 
-function escapeHtml(text) {
-    if (!text) return '';
-    const div = document.createElement('div');
-    div.textContent = text;
-    return div.innerHTML;
+function updateCarouselPosition() {
+    const track = document.getElementById('carouselTrack');
+    if (track) {
+        track.style.transform = `translateX(-${currentSlide * 100}%)`;
+    }
 }
+
+function updateDots() {
+    document.querySelectorAll('.dot').forEach((dot, index) => {
+        if (index === currentSlide) {
+            dot.classList.add('active');
+        } else {
+            dot.classList.remove('active');
+        }
+    });
+}
+
+function updateButtonsState() {
+    const prevBtn = document.getElementById('prevBtn');
+    const nextBtn = document.getElementById('nextBtn');
+    
+    if (prevBtn) prevBtn.disabled = currentSlide === 0;
+    if (nextBtn) nextBtn.disabled = currentSlide >= totalSlides - 1;
+}
+
+function nextSlide() {
+    if (currentSlide < totalSlides - 1) {
+        currentSlide++;
+        updateCarouselPosition();
+        updateDots();
+        updateButtonsState();
+    }
+}
+
+function prevSlide() {
+    if (currentSlide > 0) {
+        currentSlide--;
+        updateCarouselPosition();
+        updateDots();
+        updateButtonsState();
+    }
+}
+
+// ============================================
+// FILTROS
+// ============================================
 
 function setupFilters() {
     const filterBtns = document.querySelectorAll('.filter-btn');
@@ -336,12 +397,49 @@ function setupFilters() {
             filterBtns.forEach(b => b.classList.remove('active'));
             btn.classList.add('active');
             currentFilter = btn.dataset.filter;
-            renderPresentes();
+            currentSlide = 0;
+            renderCarrossel();
         });
     });
 }
 
-// Exportar variáveis para admin.js
+// ============================================
+// BOTÃO VOLTAR AO TOPO
+// ============================================
+
+function setupBackToTop() {
+    const backToTopBtn = document.getElementById('backToTopBtn');
+    
+    if (!backToTopBtn) return;
+    
+    window.addEventListener('scroll', () => {
+        if (window.pageYOffset > 300) {
+            backToTopBtn.classList.add('show');
+        } else {
+            backToTopBtn.classList.remove('show');
+        }
+    });
+    
+    backToTopBtn.addEventListener('click', () => {
+        window.scrollTo({
+            top: 0,
+            behavior: 'smooth'
+        });
+    });
+}
+
+// ============================================
+// FUNÇÕES AUXILIARES
+// ============================================
+
+function escapeHtml(text) {
+    if (!text) return '';
+    const div = document.createElement('div');
+    div.textContent = text;
+    return div.innerHTML;
+}
+
+// Exportar para admin.js
 window.getPresentes = () => presentes;
 window.setPresentes = (novaLista) => {
     presentes = novaLista;
@@ -351,8 +449,21 @@ window.setPresentes = (novaLista) => {
 // ============================================
 // INICIALIZAÇÃO
 // ============================================
+
 document.addEventListener('DOMContentLoaded', () => {
     iniciarContador();
-    loadPresentes();
+    carregarDaNuvem();
     setupFilters();
+    setupBackToTop();
+    
+    const prevBtn = document.getElementById('prevBtn');
+    const nextBtn = document.getElementById('nextBtn');
+    
+    if (prevBtn) prevBtn.addEventListener('click', prevSlide);
+    if (nextBtn) nextBtn.addEventListener('click', nextSlide);
+    
+    window.addEventListener('resize', () => {
+        currentSlide = 0;
+        renderCarrossel();
+    });
 });

@@ -98,11 +98,17 @@
 
 <main class="container">
     <div class="filters">
-        <div class="filter-group">
-            <button class="filter-btn active" data-filter="all">Todos</button>
-            <button class="filter-btn" data-filter="available">Disponíveis</button>
-            <button class="filter-btn" data-filter="purchased">Comprados</button>
-        </div>
+    <button class="filter-btn active" data-filter="all">Todos</button>
+    <button class="filter-btn" data-filter="available">Disponíveis</button>
+    <button class="filter-btn" data-filter="purchased">Comprados</button>
+    
+    <!-- Botões de Categorias Fixos -->
+    <button class="filter-btn category-btn" data-category="Cozinha">Cozinha</button>
+    <button class="filter-btn category-btn" data-category="Cama">Cama</button>
+    <button class="filter-btn category-btn" data-category="Banho">Banho</button>
+    <button class="filter-btn category-btn" data-category="Pix">Pix</button>
+    <button class="filter-btn category-btn" data-category="Mesa">Mesa</button>
+    </div>
         
         <div class="filter-group">
             <select id="categoryFilter" class="category-select">

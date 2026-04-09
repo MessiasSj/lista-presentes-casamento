@@ -1,14 +1,16 @@
 // ============================================
 // APP.JS - Lista de Presentes de Casamento
 // Sincronização com Sheet.best (Nuvem)
-// Com Carrossel e Botão Voltar ao Topo
+// Com Carrossel, Filtros e Categorias
 // ============================================
 
 // SUA URL DO SHEET.BEST
 const API_URL = 'https://api.sheetbest.com/sheets/b9510bd2-4034-435c-947b-6cd5cb677199';
 
 let currentFilter = 'all';
+let currentCategory = 'all';
 let presentes = [];
+let categoriasUnicas = [];
 
 // Variáveis do carrossel
 let currentSlide = 0;
@@ -34,6 +36,7 @@ async function carregarDaNuvem() {
             presentes = dados.map(item => ({
                 id: String(item.id),
                 nome: item.nome,
+                categoria: item.categoria || 'Outros',
                 url: item.url,
                 preco: parseFloat(String(item.preco).replace('R$', '').replace(',', '.').trim()),
                 imagem: item.imagem || '',
@@ -47,7 +50,11 @@ async function carregarDaNuvem() {
             presentes = [];
         }
         
+        // Extrair categorias únicas
+        extrairCategorias();
+        
         salvarNoLocalStorage();
+        atualizarSelectCategorias();
         renderCarrossel();
         
         if (typeof window.atualizarAdmin === 'function') {
@@ -61,6 +68,43 @@ async function carregarDaNuvem() {
     }
 }
 
+// Extrair categorias únicas dos produtos
+function extrairCategorias() {
+    const categoriasSet = new Set();
+    presentes.forEach(presente => {
+        if (presente.categoria && presente.categoria.trim()) {
+            categoriasSet.add(presente.categoria.trim());
+        }
+    });
+    categoriasUnicas = Array.from(categoriasSet).sort();
+    console.log("📂 Categorias encontradas:", categoriasUnicas);
+}
+
+// Atualizar o select de categorias no HTML
+function atualizarSelectCategorias() {
+    const select = document.getElementById('categoryFilter');
+    if (!select) return;
+    
+    const currentValue = select.value;
+    
+    select.innerHTML = '<option value="all">📂 Todas Categorias</option>';
+    
+    categoriasUnicas.forEach(categoria => {
+        const option = document.createElement('option');
+        option.value = categoria;
+        option.textContent = `📁 ${categoria}`;
+        select.appendChild(option);
+    });
+    
+    // Restaurar valor anterior se ainda existir
+    if (currentValue !== 'all' && categoriasUnicas.includes(currentValue)) {
+        select.value = currentValue;
+    } else {
+        select.value = 'all';
+        currentCategory = 'all';
+    }
+}
+
 // Função para atualizar um presente específico (PUT)
 async function atualizarPresenteNaNuvem(presenteAtualizado) {
     try {
@@ -71,7 +115,9 @@ async function atualizarPresenteNaNuvem(presenteAtualizado) {
             const linhaId = dados[0].id;
             
             const dadosAtualizados = {
+                id: presenteAtualizado.id,
                 nome: presenteAtualizado.nome,
+                categoria: presenteAtualizado.categoria || 'Outros',
                 url: presenteAtualizado.url,
                 preco: `R$${presenteAtualizado.preco.toFixed(2).replace('.', ',')}`,
                 imagem: presenteAtualizado.imagem || '',
@@ -103,6 +149,7 @@ async function salvarNaNuvem() {
         const dadosParaSalvar = presentes.map(p => ({
             id: p.id,
             nome: p.nome,
+            categoria: p.categoria || 'Outros',
             url: p.url,
             preco: `R$${p.preco.toFixed(2).replace('.', ',')}`,
             imagem: p.imagem || '',
@@ -137,21 +184,47 @@ function carregarDadosLocais() {
     if (stored) {
         presentes = JSON.parse(stored);
         console.log("📱 Dados carregados do localStorage:", presentes.length, "presentes");
+        extrairCategorias();
+        atualizarSelectCategorias();
     } else {
         if (presentes.length === 0) {
             presentes = [
                 {
                     id: Date.now().toString(),
                     nome: "Jogo de Panelas Antiaderentes",
+                    categoria: "Cozinha",
                     url: "https://www.magazineluiza.com.br/",
                     preco: 299.90,
                     imagem: "https://via.placeholder.com/300x200/D67A5A/FFFFFF?text=Jogo+de+Panelas",
                     comprado: false,
                     comprador: null,
                     dataCompra: null
+                },
+                {
+                    id: (Date.now() + 1).toString(),
+                    nome: "Jogo de Lençóis Casal",
+                    categoria: "Casa",
+                    url: "https://www.americanas.com.br/",
+                    preco: 189.90,
+                    imagem: "https://via.placeholder.com/300x200/D67A5A/FFFFFF?text=Lençóis",
+                    comprado: false,
+                    comprador: null,
+                    dataCompra: null
+                },
+                {
+                    id: (Date.now() + 2).toString(),
+                    nome: "Air Fryer",
+                    categoria: "Eletrodomésticos",
+                    url: "https://www.amazon.com.br/",
+                    preco: 399.90,
+                    imagem: "https://via.placeholder.com/300x200/D67A5A/FFFFFF?text=Air+Fryer",
+                    comprado: false,
+                    comprador: null,
+                    dataCompra: null
                 }
             ];
             console.log("📱 Dados iniciais criados");
+            extrairCategorias();
             salvarNaNuvem();
         }
     }
@@ -166,6 +239,8 @@ function salvarNoLocalStorage() {
 window.salvarDadosGlobal = async function() {
     salvarNoLocalStorage();
     const sucesso = await salvarNaNuvem();
+    extrairCategorias();
+    atualizarSelectCategorias();
     renderCarrossel();
     
     if (typeof window.atualizarAdmin === 'function') {
@@ -246,7 +321,7 @@ function iniciarContador() {
 }
 
 // ============================================
-// FUNÇÕES DO CARROSSEL
+// FUNÇÕES DO CARROSSEL COM FILTROS
 // ============================================
 
 function getItemsPorSlide() {
@@ -257,23 +332,36 @@ function getItemsPorSlide() {
     return 4;
 }
 
-function renderCarrossel() {
-    const container = document.getElementById('carouselTrack');
-    const dotsContainer = document.getElementById('carouselDots');
-    
-    if (!container) return;
-    
+function aplicarFiltros() {
     let filteredPresentes = [...presentes];
     
+    // Filtro por status (disponível/comprado/todos)
     if (currentFilter === 'available') {
         filteredPresentes = filteredPresentes.filter(p => !p.comprado);
     } else if (currentFilter === 'purchased') {
         filteredPresentes = filteredPresentes.filter(p => p.comprado);
     }
     
+    // Filtro por categoria
+    if (currentCategory !== 'all') {
+        filteredPresentes = filteredPresentes.filter(p => p.categoria === currentCategory);
+    }
+    
+    return filteredPresentes;
+}
+
+function renderCarrossel() {
+    const container = document.getElementById('carouselTrack');
+    const dotsContainer = document.getElementById('carouselDots');
+    
+    if (!container) return;
+    
+    const filteredPresentes = aplicarFiltros();
+    
     if (filteredPresentes.length === 0) {
         container.innerHTML = '<div class="loading">Nenhum presente encontrado nesta categoria.</div>';
         if (dotsContainer) dotsContainer.innerHTML = '';
+        totalSlides = 0;
         return;
     }
     
@@ -299,14 +387,15 @@ function renderCarrossel() {
                          onerror="this.src='https://via.placeholder.com/300x200/E8C9BC/4A3728?text=Imagem+não+disponível'">
                     <div class="presente-info">
                         <h3 class="presente-nome">${escapeHtml(presente.nome)}</h3>
+                        <p class="presente-categoria"><i class="fas fa-tag"></i> ${escapeHtml(presente.categoria || 'Sem categoria')}</p>
                         <p class="presente-preco">R$ ${presente.preco.toFixed(2)}</p>
                         <span class="presente-status ${presente.comprado ? 'status-comprado' : 'status-disponivel'}">
                             ${presente.comprado ? '✓ Comprado' : '✓ Disponível'}
                         </span>
                         ${presente.comprado ? `
-                            <p style="font-size: 0.85rem; color: var(--text-light); margin-bottom: 15px;">
-                                <i class="fas fa-user"></i> Comprado por: ${escapeHtml(presente.comprador || 'Anônimo')}<br>
-                                <i class="fas fa-calendar"></i> Em: ${presente.dataCompra ? new Date(presente.dataCompra).toLocaleDateString('pt-BR') : 'Data não registrada'}
+                            <p style="font-size: 0.75rem; color: var(--text-light); margin-bottom: 10px;">
+                                <i class="fas fa-user"></i> ${escapeHtml(presente.comprador || 'Anônimo')}<br>
+                                <i class="fas fa-calendar"></i> ${presente.dataCompra ? new Date(presente.dataCompra).toLocaleDateString('pt-BR') : 'Data não registrada'}
                             </p>
                         ` : ''}
                         <a href="${presente.url}" target="_blank" class="presente-link ${presente.comprado ? 'btn-comprado' : ''}">
@@ -324,7 +413,7 @@ function renderCarrossel() {
     `).join('');
     
     // Atualizar dots
-    if (dotsContainer) {
+    if (dotsContainer && totalSlides > 0) {
         dotsContainer.innerHTML = slides.map((_, index) => `
             <div class="dot ${index === currentSlide ? 'active' : ''}" data-slide="${index}"></div>
         `).join('');
@@ -336,6 +425,8 @@ function renderCarrossel() {
                 updateDots();
             });
         });
+    } else if (dotsContainer) {
+        dotsContainer.innerHTML = '';
     }
     
     updateCarouselPosition();
@@ -344,7 +435,7 @@ function renderCarrossel() {
 
 function updateCarouselPosition() {
     const track = document.getElementById('carouselTrack');
-    if (track) {
+    if (track && totalSlides > 0) {
         track.style.transform = `translateX(-${currentSlide * 100}%)`;
     }
 }
@@ -363,8 +454,8 @@ function updateButtonsState() {
     const prevBtn = document.getElementById('prevBtn');
     const nextBtn = document.getElementById('nextBtn');
     
-    if (prevBtn) prevBtn.disabled = currentSlide === 0;
-    if (nextBtn) nextBtn.disabled = currentSlide >= totalSlides - 1;
+    if (prevBtn) prevBtn.disabled = currentSlide === 0 || totalSlides === 0;
+    if (nextBtn) nextBtn.disabled = currentSlide >= totalSlides - 1 || totalSlides === 0;
 }
 
 function nextSlide() {
@@ -391,7 +482,9 @@ function prevSlide() {
 
 function setupFilters() {
     const filterBtns = document.querySelectorAll('.filter-btn');
+    const categorySelect = document.getElementById('categoryFilter');
     
+    // Filtros de status (Todos, Disponíveis, Comprados)
     filterBtns.forEach(btn => {
         btn.addEventListener('click', () => {
             filterBtns.forEach(b => b.classList.remove('active'));
@@ -401,6 +494,15 @@ function setupFilters() {
             renderCarrossel();
         });
     });
+    
+    // Filtro de categorias
+    if (categorySelect) {
+        categorySelect.addEventListener('change', (e) => {
+            currentCategory = e.target.value;
+            currentSlide = 0;
+            renderCarrossel();
+        });
+    }
 }
 
 // ============================================
@@ -443,6 +545,8 @@ function escapeHtml(text) {
 window.getPresentes = () => presentes;
 window.setPresentes = (novaLista) => {
     presentes = novaLista;
+    extrairCategorias();
+    atualizarSelectCategorias();
     salvarNoLocalStorage();
 };
 

@@ -97,17 +97,22 @@
 </div>
 
 <main class="container">
-    <div class="filters">
-    <button class="filter-btn active" data-filter="all">Todos</button>
-    <button class="filter-btn" data-filter="available">Disponíveis</button>
-    <button class="filter-btn" data-filter="purchased">Comprados</button>
-    
-    <!-- Botões de Categorias Fixos na nova ordem -->
-    <button class="filter-btn category-btn" data-category="Cozinha">Cozinha</button>
-    <button class="filter-btn category-btn" data-category="Cama">Cama</button>
-    <button class="filter-btn category-btn" data-category="Mesa">Mesa</button>
-    <button class="filter-btn category-btn" data-category="Banho">Banho</button>
-    <button class="filter-btn category-btn" data-category="Pix">Pix</button>
+    <<div class="filters">
+    <!-- Primeira linha: Filtros principais -->
+    <div class="filter-row-primary">
+            <button class="filter-btn active" data-filter="all">Todos</button>
+            <button class="filter-btn" data-filter="available">Disponíveis</button>
+            <button class="filter-btn" data-filter="purchased">Comprados</button>
+        </div>
+        
+        <!-- Segunda linha: Filtros de categoria -->
+        <div class="filter-row-categories">
+            <button class="filter-btn category-btn" data-category="Cozinha">Cozinha</button>
+            <button class="filter-btn category-btn" data-category="Cama">Cama</button>
+            <button class="filter-btn category-btn" data-category="Mesa">Mesa</button>
+            <button class="filter-btn category-btn" data-category="Banho">Banho</button>
+            <button class="filter-btn category-btn" data-category="Pix">Pix</button>
+        </div>
     </div>
         
         <div class="filter-group">

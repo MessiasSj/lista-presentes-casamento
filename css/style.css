@@ -528,7 +528,7 @@ hr {
 
 /* PREÇO - GRANDE (2.0rem) SEM "R$" EXTRA */
 .presente-preco {
-    font-size: 3.0rem;
+    font-size: 4.0rem;
     font-weight: bold;
     color: var(--terra-cota-primary);
     margin-bottom: 0;
@@ -774,7 +774,7 @@ footer p {
     }
     
     .presente-card {
-        aspect-ratio: 1 / 1.3;
+        aspect-ratio: 1 / 1.5;
     }
     
     /* Ajuste do preço no tablet */

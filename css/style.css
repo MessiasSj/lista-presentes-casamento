@@ -613,8 +613,6 @@ hr {
     align-items: center;
     gap: 20px;
     margin: 40px 0;
-    max-height: 800px;  /* ← ADICIONE ESTA LINHA - controle a altura máxima */
-    min-height: 600px;  /* ← ADICIONE ESTA LINHA - controle a altura mínima */
 }
 
 .carousel-wrapper {

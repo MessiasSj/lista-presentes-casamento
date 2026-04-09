@@ -424,28 +424,28 @@ hr {
 }
 
 /* ============================================
-   FILTROS - VERSÃO COM BOTÕES FIXOS
+   FILTROS - BOTÕES MAIORES E ESPAÇO REDUZIDO
    ============================================ */
 
 .filters {
     display: flex;
     justify-content: center;
     align-items: center;
-    gap: 12px;
+    gap: 8px;
     margin-bottom: 30px;
     flex-wrap: wrap;
 }
 
 .filter-btn {
-    padding: 8px 22px;
+    padding: 10px 24px;
     background: white;
     border: 2px solid var(--terra-cota-border);
-    border-radius: 30px;
+    border-radius: 40px;
     cursor: pointer;
     transition: 0.3s;
-    font-size: 0.85rem;
+    font-size: 0.95rem;
+    font-weight: 600;
     color: var(--text-dark);
-    font-weight: 500;
     white-space: nowrap;
 }
 
@@ -458,6 +458,29 @@ hr {
     box-shadow: 0 5px 15px rgba(214, 122, 90, 0.3);
 }
 
+/* Responsivo para tablet */
+@media (max-width: 768px) {
+    .filters {
+        gap: 6px;
+    }
+    
+    .filter-btn {
+        padding: 8px 18px;
+        font-size: 0.85rem;
+    }
+}
+
+/* Responsivo para mobile */
+@media (max-width: 480px) {
+    .filters {
+        gap: 5px;
+    }
+    
+    .filter-btn {
+        padding: 6px 12px;
+        font-size: 0.75rem;
+    }
+}
 /* ============================================
    CARDS - TEXTO COMPACTO (2 LINHAS) + BOTÕES
    ============================================ */

@@ -531,7 +531,7 @@ hr {
 
 /* PREÇO - COMPACTO */
 .presente-preco {
-    font-size: 0.9rem;
+    font-size: 1.3rem;
     font-weight: bold;
     color: var(--terra-cota-primary);
     margin-bottom: 0;
@@ -539,7 +539,7 @@ hr {
 
 .presente-preco::before {
     content: 'R$ ';
-    font-size: 0.7rem;
+    font-size: 1.0rem;
     font-weight: normal;
 }
 
@@ -548,7 +548,7 @@ hr {
     display: inline-block;
     padding: 2px 6px;
     border-radius: 10px;
-    font-size: 0.6rem;
+    font-size: 0.8rem;
     margin-bottom: 0;
     font-weight: 600;
     align-self: flex-start;
@@ -583,7 +583,7 @@ hr {
 
 .presente-link:hover {
     transform: translateY(-1px);
-    box-shadow: 0 2px 8px rgba(214, 122, 90, 0.3);
+    box-shadow: 0 4px 10px rgba(214, 122, 90, 0.3);
 }
 
 .btn-comprar {
@@ -600,7 +600,7 @@ hr {
 
 /* Texto do comprador - escondido ou muito pequeno */
 .presente-info p {
-    font-size: 0.55rem;
+    font-size: 0.9rem;
     margin-bottom: 0;
     line-height: 1.2;
 }

@@ -528,7 +528,7 @@ hr {
 
 /* PREÇO - GRANDE (2.0rem) SEM "R$" EXTRA */
 .presente-preco {
-    font-size: 2.0rem;
+    font-size: 3.0rem;
     font-weight: bold;
     color: var(--terra-cota-primary);
     margin-bottom: 0;

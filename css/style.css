@@ -424,18 +424,36 @@ hr {
 }
 
 /* ============================================
-   FILTROS - BOTÕES MAIORES E ESPAÇO REDUZIDO
+   FILTROS - HIERARQUIA EM DUAS LINHAS
    ============================================ */
 
 .filters {
     display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 15px;
+    margin-bottom: 35px;
+}
+
+/* Primeira linha - Filtros principais */
+.filter-row-primary {
+    display: flex;
     justify-content: center;
     align-items: center;
-    gap: 8px;
-    margin-bottom: 30px;
+    gap: 10px;
     flex-wrap: wrap;
 }
 
+/* Segunda linha - Filtros de categoria */
+.filter-row-categories {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    gap: 8px;
+    flex-wrap: wrap;
+}
+
+/* Estilo padrão para todos os botões */
 .filter-btn {
     padding: 10px 24px;
     background: white;
@@ -458,9 +476,26 @@ hr {
     box-shadow: 0 5px 15px rgba(214, 122, 90, 0.3);
 }
 
+/* Estilo diferenciado para a linha principal (opcional - um pouco mais destacado) */
+.filter-row-primary .filter-btn {
+    padding: 12px 28px;
+    font-size: 1rem;
+    font-weight: 700;
+    border-width: 2px;
+}
+
 /* Responsivo para tablet */
 @media (max-width: 768px) {
     .filters {
+        gap: 12px;
+        margin-bottom: 25px;
+    }
+    
+    .filter-row-primary {
+        gap: 8px;
+    }
+    
+    .filter-row-categories {
         gap: 6px;
     }
     
@@ -468,19 +503,39 @@ hr {
         padding: 8px 18px;
         font-size: 0.85rem;
     }
+    
+    .filter-row-primary .filter-btn {
+        padding: 10px 22px;
+        font-size: 0.9rem;
+    }
 }
 
 /* Responsivo para mobile */
 @media (max-width: 480px) {
     .filters {
+        gap: 10px;
+        margin-bottom: 20px;
+    }
+    
+    .filter-row-primary {
+        gap: 6px;
+    }
+    
+    .filter-row-categories {
         gap: 5px;
     }
     
     .filter-btn {
         padding: 6px 12px;
+        font-size: 0.7rem;
+    }
+    
+    .filter-row-primary .filter-btn {
+        padding: 8px 16px;
         font-size: 0.75rem;
     }
 }
+
 /* ============================================
    CARDS - TEXTO COMPACTO (2 LINHAS) + BOTÕES
    ============================================ */

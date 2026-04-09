@@ -469,7 +469,7 @@ hr {
     flex-direction: column;
     height: 100%;
     /* Card muito mais alto para mostrar todos os botões */
-    aspect-ratio: 1 / 1.80;
+    aspect-ratio: 1 / 2.20;
 }
 
 .presente-card::before {
